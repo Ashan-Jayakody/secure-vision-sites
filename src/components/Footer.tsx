@@ -106,9 +106,17 @@ const Footer = () => {
           <p className="text-muted-foreground text-sm">
             © {currentYear} SecureView. All rights reserved.
           </p>
-          <p className="text-muted-foreground text-sm">
-            Licensed & Insured | 24/7 Emergency Service
-          </p>
+          <div className="flex items-center gap-6">
+            <a 
+              href="/admin/login" 
+              className="text-muted-foreground text-sm hover:text-foreground transition-colors"
+            >
+              Admin
+            </a>
+            <p className="text-muted-foreground text-sm">
+              Licensed & Insured | 24/7 Emergency Service
+            </p>
+          </div>
         </div>
       </div>
     </footer>
