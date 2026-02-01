@@ -1,30 +1,39 @@
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
-import { useAlbums, Installation } from "@/hooks/useAlbums";
+import { X, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
+import { useAlbums, Installation, Album } from "@/hooks/useAlbums";
 
 const Gallery = () => {
   const { albums, isLoading } = useAlbums();
+  const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [currentAlbumInstallations, setCurrentAlbumInstallations] = useState<Installation[]>([]);
 
-  const handleImageClick = (image: string, installations: Installation[], index: number) => {
+  const handleAlbumClick = (album: Album) => {
+    setSelectedAlbum(album);
+  };
+
+  const handleBackToAlbums = () => {
+    setSelectedAlbum(null);
+  };
+
+  const handleImageClick = (image: string, index: number) => {
     setSelectedImage(image);
-    setCurrentAlbumInstallations(installations);
     setCurrentImageIndex(index);
   };
 
   const navigateImage = (direction: "prev" | "next") => {
+    if (!selectedAlbum) return;
+    const installations = selectedAlbum.installations;
+    
     if (direction === "prev") {
-      const newIndex = currentImageIndex > 0 ? currentImageIndex - 1 : currentAlbumInstallations.length - 1;
+      const newIndex = currentImageIndex > 0 ? currentImageIndex - 1 : installations.length - 1;
       setCurrentImageIndex(newIndex);
-      setSelectedImage(currentAlbumInstallations[newIndex].image);
+      setSelectedImage(installations[newIndex].image);
     } else {
-      const newIndex = currentImageIndex < currentAlbumInstallations.length - 1 ? currentImageIndex + 1 : 0;
+      const newIndex = currentImageIndex < installations.length - 1 ? currentImageIndex + 1 : 0;
       setCurrentImageIndex(newIndex);
-      setSelectedImage(currentAlbumInstallations[newIndex].image);
+      setSelectedImage(installations[newIndex].image);
     }
   };
 
@@ -38,9 +47,6 @@ const Gallery = () => {
     );
   }
 
-  // Get all installations across all albums for "All" tab
-  const allInstallations = albums.flatMap((album) => album.installations);
-
   return (
     <section id="gallery" className="py-20 md:py-32 bg-background">
       <div className="container mx-auto px-4">
@@ -48,98 +54,102 @@ const Gallery = () => {
         <div className="text-center max-w-2xl mx-auto mb-16">
           <span className="text-primary text-sm font-semibold uppercase tracking-wider">Our Work</span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-4 mb-6">
-            Recent Installations
+            {selectedAlbum ? selectedAlbum.name : "Recent Installations"}
           </h2>
           <p className="text-muted-foreground text-lg">
-            Browse through our portfolio of successful CCTV installations 
-            across various industries and property types.
+            {selectedAlbum 
+              ? selectedAlbum.description 
+              : "Browse through our portfolio of successful CCTV installations across various industries and property types."
+            }
           </p>
         </div>
 
-        {/* Album Tabs */}
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="flex flex-wrap justify-center gap-2 bg-transparent mb-8 h-auto">
-            <TabsTrigger
-              value="all"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground bg-card/50 border border-border"
-            >
-              All
-            </TabsTrigger>
-            {albums.map((album) => (
-              <TabsTrigger
-                key={album.id}
-                value={album.id}
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground bg-card/50 border border-border"
-              >
-                {album.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        {/* Back Button when viewing album */}
+        {selectedAlbum && (
+          <button
+            onClick={handleBackToAlbums}
+            className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors mb-8"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="font-medium">Back to Albums</span>
+          </button>
+        )}
 
-          {/* All Installations */}
-          <TabsContent value="all">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {allInstallations.map((installation, index) => (
-                <div
-                  key={installation.id}
-                  className="group relative overflow-hidden rounded-xl cursor-pointer animate-scale-in opacity-0"
-                  style={{ animationDelay: `${0.1 * (index % 6)}s` }}
-                  onClick={() => handleImageClick(installation.image, allInstallations, index)}
-                >
-                  <div className="aspect-[4/3] overflow-hidden">
+        {/* Albums Grid */}
+        {!selectedAlbum && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {albums.map((album, index) => (
+              <div
+                key={album.id}
+                className="group relative overflow-hidden rounded-xl cursor-pointer animate-scale-in opacity-0 bg-card border border-border"
+                style={{ animationDelay: `${0.1 * index}s` }}
+                onClick={() => handleAlbumClick(album)}
+              >
+                {/* Album Cover - First installation image or placeholder */}
+                <div className="aspect-[4/3] overflow-hidden">
+                  {album.installations.length > 0 ? (
                     <img
-                      src={installation.image}
-                      alt={installation.title}
+                      src={album.installations[0].image}
+                      alt={album.name}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="absolute bottom-0 left-0 right-0 p-6">
-                      <span className="text-primary text-sm font-medium">{installation.category}</span>
-                      <h3 className="text-foreground text-xl font-semibold mt-1">{installation.title}</h3>
+                  ) : (
+                    <div className="w-full h-full bg-muted flex items-center justify-center">
+                      <span className="text-muted-foreground">No images</span>
                     </div>
+                  )}
+                </div>
+                
+                {/* Album Info Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300">
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 className="text-foreground text-xl font-semibold">{album.name}</h3>
+                    <p className="text-muted-foreground text-sm mt-1 line-clamp-2">{album.description}</p>
+                    <span className="text-primary text-sm font-medium mt-2 inline-block">
+                      {album.installations.length} {album.installations.length === 1 ? "photo" : "photos"}
+                    </span>
                   </div>
                 </div>
-              ))}
-            </div>
-          </TabsContent>
+              </div>
+            ))}
+          </div>
+        )}
 
-          {/* Album-specific tabs */}
-          {albums.map((album) => (
-            <TabsContent key={album.id} value={album.id}>
-              {album.installations.length === 0 ? (
-                <p className="text-center text-muted-foreground py-12">
-                  No installations in this album yet.
-                </p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {album.installations.map((installation, index) => (
-                    <div
-                      key={installation.id}
-                      className="group relative overflow-hidden rounded-xl cursor-pointer animate-scale-in opacity-0"
-                      style={{ animationDelay: `${0.1 * (index % 6)}s` }}
-                      onClick={() => handleImageClick(installation.image, album.installations, index)}
-                    >
-                      <div className="aspect-[4/3] overflow-hidden">
-                        <img
-                          src={installation.image}
-                          alt={installation.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                      </div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="absolute bottom-0 left-0 right-0 p-6">
-                          <span className="text-primary text-sm font-medium">{installation.category}</span>
-                          <h3 className="text-foreground text-xl font-semibold mt-1">{installation.title}</h3>
-                        </div>
+        {/* Album Images Grid */}
+        {selectedAlbum && (
+          <>
+            {selectedAlbum.installations.length === 0 ? (
+              <p className="text-center text-muted-foreground py-12">
+                No installations in this album yet.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {selectedAlbum.installations.map((installation, index) => (
+                  <div
+                    key={installation.id}
+                    className="group relative overflow-hidden rounded-xl cursor-pointer animate-scale-in opacity-0"
+                    style={{ animationDelay: `${0.1 * (index % 6)}s` }}
+                    onClick={() => handleImageClick(installation.image, index)}
+                  >
+                    <div className="aspect-[4/3] overflow-hidden">
+                      <img
+                        src={installation.image}
+                        alt={installation.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute bottom-0 left-0 right-0 p-6">
+                        <span className="text-primary text-sm font-medium">{installation.category}</span>
+                        <h3 className="text-foreground text-xl font-semibold mt-1">{installation.title}</h3>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-          ))}
-        </Tabs>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Lightbox Dialog with Navigation */}
@@ -152,7 +162,7 @@ const Gallery = () => {
             <X className="w-5 h-5" />
           </button>
           
-          {currentAlbumInstallations.length > 1 && (
+          {selectedAlbum && selectedAlbum.installations.length > 1 && (
             <>
               <button
                 onClick={() => navigateImage("prev")}
@@ -169,23 +179,23 @@ const Gallery = () => {
             </>
           )}
           
-          {selectedImage && (
+          {selectedImage && selectedAlbum && (
             <div>
               <img
                 src={selectedImage}
                 alt="Project detail"
                 className="w-full h-auto"
               />
-              {currentAlbumInstallations[currentImageIndex] && (
+              {selectedAlbum.installations[currentImageIndex] && (
                 <div className="p-4 bg-card">
                   <span className="text-primary text-sm font-medium">
-                    {currentAlbumInstallations[currentImageIndex].category}
+                    {selectedAlbum.installations[currentImageIndex].category}
                   </span>
                   <h3 className="text-foreground text-lg font-semibold">
-                    {currentAlbumInstallations[currentImageIndex].title}
+                    {selectedAlbum.installations[currentImageIndex].title}
                   </h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {currentImageIndex + 1} of {currentAlbumInstallations.length}
+                    {currentImageIndex + 1} of {selectedAlbum.installations.length}
                   </p>
                 </div>
               )}
