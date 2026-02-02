@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { albumsApi, Album, Installation } from "@/services/albumsApi";
 
 import gallery1 from "@/assets/gallery-1.jpg";
 import gallery2 from "@/assets/gallery-2.jpg";
@@ -7,129 +8,142 @@ import gallery4 from "@/assets/gallery-4.jpg";
 import gallery5 from "@/assets/gallery-5.jpg";
 import gallery6 from "@/assets/gallery-6.jpg";
 
-export interface Installation {
-  id: string;
-  image: string;
-  title: string;
-  category: string;
-  description?: string;
-  date: string;
-}
+// Re-export types for backwards compatibility
+export type { Album, Installation };
 
-export interface Album {
-  id: string;
-  name: string;
-  description: string;
-  installations: Installation[];
-  createdAt: string;
-}
-
-// Default albums with initial data
-const defaultAlbums: Album[] = [
+// Fallback data when API is unavailable
+const fallbackAlbums: Album[] = [
   {
-    id: "default-1",
+    _id: "default-1",
     name: "Recent Installations",
     description: "Our latest CCTV installations across various industries",
     installations: [
-      { id: "1", image: gallery1, title: "Corporate Office", category: "Commercial", date: "2024-01-15" },
-      { id: "2", image: gallery2, title: "Residential Home", category: "Residential", date: "2024-01-10" },
-      { id: "3", image: gallery3, title: "Warehouse Facility", category: "Industrial", date: "2024-01-05" },
-      { id: "4", image: gallery4, title: "Retail Store", category: "Commercial", date: "2023-12-20" },
-      { id: "5", image: gallery5, title: "Parking Lot", category: "Outdoor", date: "2023-12-15" },
-      { id: "6", image: gallery6, title: "Financial Institution", category: "Commercial", date: "2023-12-10" },
+      { _id: "1", image: gallery1, title: "Corporate Office", category: "Commercial", date: "2024-01-15" },
+      { _id: "2", image: gallery2, title: "Residential Home", category: "Residential", date: "2024-01-10" },
+      { _id: "3", image: gallery3, title: "Warehouse Facility", category: "Industrial", date: "2024-01-05" },
+      { _id: "4", image: gallery4, title: "Retail Store", category: "Commercial", date: "2023-12-20" },
+      { _id: "5", image: gallery5, title: "Parking Lot", category: "Outdoor", date: "2023-12-15" },
+      { _id: "6", image: gallery6, title: "Financial Institution", category: "Commercial", date: "2023-12-10" },
     ],
     createdAt: "2024-01-01",
   },
 ];
 
-const STORAGE_KEY = "secureview_albums";
-
 export const useAlbums = () => {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setAlbums(JSON.parse(stored));
-      } catch {
-        setAlbums(defaultAlbums);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultAlbums));
-      }
-    } else {
-      setAlbums(defaultAlbums);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultAlbums));
+  const fetchAlbums = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await albumsApi.getAll();
+      setAlbums(data.length > 0 ? data : fallbackAlbums);
+    } catch (err) {
+      console.error('Failed to fetch albums:', err);
+      setError('Failed to connect to server. Using offline data.');
+      setAlbums(fallbackAlbums);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
-  const saveAlbums = (newAlbums: Album[]) => {
-    setAlbums(newAlbums);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newAlbums));
+  useEffect(() => {
+    fetchAlbums();
+  }, [fetchAlbums]);
+
+  const addAlbum = async (album: { name: string; description: string; installations?: Installation[] }) => {
+    try {
+      const newAlbum = await albumsApi.create(album);
+      setAlbums(prev => [...prev, newAlbum]);
+      return newAlbum;
+    } catch (err) {
+      console.error('Failed to create album:', err);
+      throw err;
+    }
   };
 
-  const addAlbum = (album: Omit<Album, "id" | "createdAt">) => {
-    const newAlbum: Album = {
-      ...album,
-      id: `album-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
-    saveAlbums([...albums, newAlbum]);
-    return newAlbum;
+  const updateAlbum = async (id: string, updates: { name?: string; description?: string }) => {
+    try {
+      const updated = await albumsApi.update(id, updates);
+      setAlbums(prev => prev.map(album => album._id === id ? updated : album));
+      return updated;
+    } catch (err) {
+      console.error('Failed to update album:', err);
+      throw err;
+    }
   };
 
-  const updateAlbum = (id: string, updates: Partial<Omit<Album, "id" | "createdAt">>) => {
-    const updated = albums.map((album) =>
-      album.id === id ? { ...album, ...updates } : album
-    );
-    saveAlbums(updated);
+  const deleteAlbum = async (id: string) => {
+    try {
+      await albumsApi.delete(id);
+      setAlbums(prev => prev.filter(album => album._id !== id));
+    } catch (err) {
+      console.error('Failed to delete album:', err);
+      throw err;
+    }
   };
 
-  const deleteAlbum = (id: string) => {
-    saveAlbums(albums.filter((album) => album.id !== id));
+  const addInstallation = async (albumId: string, installation: Omit<Installation, '_id' | 'id'>) => {
+    try {
+      const newInstallation = await albumsApi.addInstallation(albumId, installation);
+      setAlbums(prev => prev.map(album => 
+        album._id === albumId 
+          ? { ...album, installations: [...album.installations, newInstallation] }
+          : album
+      ));
+      return newInstallation;
+    } catch (err) {
+      console.error('Failed to add installation:', err);
+      throw err;
+    }
   };
 
-  const addInstallation = (albumId: string, installation: Omit<Installation, "id">) => {
-    const newInstallation: Installation = {
-      ...installation,
-      id: `inst-${Date.now()}`,
-    };
-    const updated = albums.map((album) =>
-      album.id === albumId
-        ? { ...album, installations: [...album.installations, newInstallation] }
-        : album
-    );
-    saveAlbums(updated);
-    return newInstallation;
+  const updateInstallation = async (albumId: string, installationId: string, updates: Partial<Installation>) => {
+    try {
+      const updated = await albumsApi.updateInstallation(albumId, installationId, updates);
+      setAlbums(prev => prev.map(album => 
+        album._id === albumId 
+          ? {
+              ...album,
+              installations: album.installations.map(inst => 
+                (inst._id || inst.id) === installationId ? updated : inst
+              )
+            }
+          : album
+      ));
+      return updated;
+    } catch (err) {
+      console.error('Failed to update installation:', err);
+      throw err;
+    }
   };
 
-  const updateInstallation = (albumId: string, installationId: string, updates: Partial<Installation>) => {
-    const updated = albums.map((album) =>
-      album.id === albumId
-        ? {
-            ...album,
-            installations: album.installations.map((inst) =>
-              inst.id === installationId ? { ...inst, ...updates } : inst
-            ),
-          }
-        : album
-    );
-    saveAlbums(updated);
-  };
-
-  const deleteInstallation = (albumId: string, installationId: string) => {
-    const updated = albums.map((album) =>
-      album.id === albumId
-        ? { ...album, installations: album.installations.filter((inst) => inst.id !== installationId) }
-        : album
-    );
-    saveAlbums(updated);
+  const deleteInstallation = async (albumId: string, installationId: string) => {
+    try {
+      await albumsApi.deleteInstallation(albumId, installationId);
+      setAlbums(prev => prev.map(album => 
+        album._id === albumId 
+          ? {
+              ...album,
+              installations: album.installations.filter(inst => 
+                (inst._id || inst.id) !== installationId
+              )
+            }
+          : album
+      ));
+    } catch (err) {
+      console.error('Failed to delete installation:', err);
+      throw err;
+    }
   };
 
   return {
     albums,
     isLoading,
+    error,
+    refetch: fetchAlbums,
     addAlbum,
     updateAlbum,
     deleteAlbum,
