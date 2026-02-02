@@ -56,7 +56,7 @@ export const useAlbums = () => {
   const addAlbum = async (album: { name: string; description: string; installations?: Installation[] }) => {
     try {
       const newAlbum = await albumsApi.create(album);
-      setAlbums(prev => [...prev, newAlbum]);
+      setAlbums(prev => [newAlbum, ...prev]);
       return newAlbum;
     } catch (err) {
       console.error('Failed to create album:', err);

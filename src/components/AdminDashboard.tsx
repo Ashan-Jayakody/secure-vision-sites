@@ -142,10 +142,6 @@ const AdminDashboard = () => {
       setInstImageFile(null);
       setIsInstallationDialogOpen(false);
       
-      // Refresh selected album
-      const updated = albums.find((a) => a._id === selectedAlbum._id);
-      if (updated) setSelectedAlbum(updated);
-      
       toast({ title: "Installation added successfully" });
     } catch (error) {
       toast({ title: "Failed to add installation", variant: "destructive" });
@@ -299,7 +295,7 @@ const AdminDashboard = () => {
                     {album.installations.length > 0 && (
                       <div className="grid grid-cols-3 gap-1 mt-4">
                         {album.installations.slice(0, 3).map((inst) => (
-                          <div key={inst.id} className="aspect-square rounded overflow-hidden">
+                          <div key={inst._id || inst.id} className="aspect-square rounded overflow-hidden">
                             <img
                               src={inst.image}
                               alt={inst.title}
@@ -463,7 +459,7 @@ const AdminDashboard = () => {
                         variant="destructive"
                         size="icon"
                         className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
-                        onClick={() => handleDeleteInstallation(inst.id)}
+                        onClick={() => handleDeleteInstallation(inst._id || inst.id)}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
