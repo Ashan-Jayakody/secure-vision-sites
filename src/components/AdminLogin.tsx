@@ -19,10 +19,7 @@ const AdminLogin = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate a brief delay for UX
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    const success = login(password);
+    const success = await login(password);
     setIsLoading(false);
 
     if (success) {

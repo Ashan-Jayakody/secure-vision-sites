@@ -1,39 +1,46 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from "react";
+import { authApi } from "@/services/authApi";
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (password: string) => boolean;
+  login: (password: string) => Promise<boolean>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Simple admin password - in production, this should be handled by a proper backend
-const ADMIN_PASSWORD = "secureview2024";
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const authStatus = localStorage.getItem("admin_authenticated");
-    if (authStatus === "true") {
-      setIsAuthenticated(true);
-    }
+    const checkAuth = async () => {
+      const isAuth = await authApi.isAuthenticated();
+      setIsAuthenticated(isAuth);
+      setIsLoading(false);
+    };
+    checkAuth();
   }, []);
 
-  const login = (password: string): boolean => {
-    if (password === ADMIN_PASSWORD) {
+  const login = async (password: string): Promise<boolean> => {
+    try {
+      await authApi.login(password);
       setIsAuthenticated(true);
-      localStorage.setItem("admin_authenticated", "true");
       return true;
+    } catch (error) {
+      console.error("Login failed:", error);
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
+    authApi.logout();
     setIsAuthenticated(false);
-    localStorage.removeItem("admin_authenticated");
   };
+
+  if (isLoading) {
+    return null; // Or a loading spinner
+  }
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, login, logout }}>

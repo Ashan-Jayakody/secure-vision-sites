@@ -39,11 +39,11 @@ export const useAlbums = () => {
     setError(null);
     try {
       const data = await albumsApi.getAll();
-      setAlbums(data.length > 0 ? data : fallbackAlbums);
+      setAlbums(data);
     } catch (err) {
       console.error('Failed to fetch albums:', err);
-      setError('Failed to connect to server. Using offline data.');
-      setAlbums(fallbackAlbums);
+      setError('Failed to connect to server.');
+      setAlbums([]);
     } finally {
       setIsLoading(false);
     }
