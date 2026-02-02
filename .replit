@@ -26,14 +26,23 @@ args = "Start application"
 name = "Start application"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash -c \"node backend/server.js & npm run dev\""
+waitForPort = 5000
 
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[userenv]
+
+[userenv.shared]
+MONGODB_URI = "mongodb+srv://jayakody_ashan25:20020425@Aj@cluster0.i2b8iov.mongodb.net/?appName=Cluster0"
+JWT_SECRET = "20020425@Aj"
+ADMIN_PASSWORD = "secureview2024"
+VITE_CLOUDINARY_CLOUD_NAME = "dh3sza0e8"
+VITE_CLOUDINARY_UPLOAD_PRESET = "unsinged_preset"

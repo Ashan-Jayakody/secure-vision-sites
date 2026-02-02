@@ -1,11 +1,11 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
+const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 5001;
 
 // Middleware
 app.use(cors());
@@ -53,15 +53,11 @@ const authenticateToken = (req, res, next) => {
 };
 
 // Routes
-
-// Auth
 app.post('/api/auth/login', (req, res) => {
   const { password } = req.body;
-  
   if (password !== process.env.ADMIN_PASSWORD) {
     return res.status(401).json({ error: 'Invalid password' });
   }
-  
   const token = jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '24h' });
   res.json({ token });
 });
@@ -70,7 +66,6 @@ app.get('/api/auth/verify', authenticateToken, (req, res) => {
   res.json({ valid: true });
 });
 
-// Albums - Public
 app.get('/api/albums', async (req, res) => {
   try {
     const albums = await Album.find().sort({ createdAt: -1 });
@@ -83,16 +78,13 @@ app.get('/api/albums', async (req, res) => {
 app.get('/api/albums/:id', async (req, res) => {
   try {
     const album = await Album.findById(req.params.id);
-    if (!album) {
-      return res.status(404).json({ error: 'Album not found' });
-    }
+    if (!album) return res.status(404).json({ error: 'Album not found' });
     res.json(album);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Albums - Protected
 app.post('/api/albums', authenticateToken, async (req, res) => {
   try {
     const album = new Album(req.body);
@@ -110,9 +102,7 @@ app.put('/api/albums/:id', authenticateToken, async (req, res) => {
       { name: req.body.name, description: req.body.description },
       { new: true }
     );
-    if (!album) {
-      return res.status(404).json({ error: 'Album not found' });
-    }
+    if (!album) return res.status(404).json({ error: 'Album not found' });
     res.json(album);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -122,28 +112,20 @@ app.put('/api/albums/:id', authenticateToken, async (req, res) => {
 app.delete('/api/albums/:id', authenticateToken, async (req, res) => {
   try {
     const album = await Album.findByIdAndDelete(req.params.id);
-    if (!album) {
-      return res.status(404).json({ error: 'Album not found' });
-    }
+    if (!album) return res.status(404).json({ error: 'Album not found' });
     res.json({ message: 'Album deleted' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Installations - Protected
 app.post('/api/albums/:albumId/installations', authenticateToken, async (req, res) => {
   try {
     const album = await Album.findById(req.params.albumId);
-    if (!album) {
-      return res.status(404).json({ error: 'Album not found' });
-    }
-    
+    if (!album) return res.status(404).json({ error: 'Album not found' });
     album.installations.push(req.body);
     await album.save();
-    
-    const newInstallation = album.installations[album.installations.length - 1];
-    res.status(201).json(newInstallation);
+    res.status(201).json(album.installations[album.installations.length - 1]);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -152,18 +134,11 @@ app.post('/api/albums/:albumId/installations', authenticateToken, async (req, re
 app.put('/api/albums/:albumId/installations/:installationId', authenticateToken, async (req, res) => {
   try {
     const album = await Album.findById(req.params.albumId);
-    if (!album) {
-      return res.status(404).json({ error: 'Album not found' });
-    }
-    
+    if (!album) return res.status(404).json({ error: 'Album not found' });
     const installation = album.installations.id(req.params.installationId);
-    if (!installation) {
-      return res.status(404).json({ error: 'Installation not found' });
-    }
-    
+    if (!installation) return res.status(404).json({ error: 'Installation not found' });
     Object.assign(installation, req.body);
     await album.save();
-    
     res.json(installation);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -173,24 +148,19 @@ app.put('/api/albums/:albumId/installations/:installationId', authenticateToken,
 app.delete('/api/albums/:albumId/installations/:installationId', authenticateToken, async (req, res) => {
   try {
     const album = await Album.findById(req.params.albumId);
-    if (!album) {
-      return res.status(404).json({ error: 'Album not found' });
-    }
-    
+    if (!album) return res.status(404).json({ error: 'Album not found' });
     album.installations.pull(req.params.installationId);
     await album.save();
-    
     res.json({ message: 'Installation deleted' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', mongodb: mongoose.connection.readyState === 1 });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
