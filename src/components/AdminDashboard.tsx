@@ -11,7 +11,7 @@ import { useAlbums, Album } from "@/hooks/useAlbums";
 import { useMessages } from "@/hooks/useMessages";
 import { toast } from "@/hooks/use-toast";
 import { uploadImage } from "@/services/cloudinaryApi";
-import { Plus, Trash2, Edit, LogOut, FolderPlus, Image, ArrowLeft, X, Loader2, Mail, LayoutDashboard, Settings } from "lucide-react";
+import { Plus, Trash2, Edit, LogOut, FolderPlus, Image, ArrowLeft, X, Loader2, Mail, LayoutDashboard, Settings, Phone } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AdminDashboard = () => {
