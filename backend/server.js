@@ -60,6 +60,17 @@ const albumSchema = new mongoose.Schema({
 
 const Album = mongoose.model('Album', albumSchema);
 
+const messageSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  phone: String,
+  service: { type: String, required: true },
+  message: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Message = mongoose.model('Message', messageSchema);
+
 // Auth Middleware
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -178,6 +189,41 @@ app.delete('/api/albums/:albumId/installations/:installationId', authenticateTok
     album.installations.pull(req.params.installationId);
     await album.save();
     res.json({ message: 'Installation deleted' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Messages
+app.post('/api/messages', async (req, res) => {
+  try {
+    // We add a default service if not provided since schema requires it
+    const messageData = {
+      ...req.body,
+      service: req.body.service || 'Security Assessment'
+    };
+    const message = new Message(messageData);
+    await message.save();
+    res.status(201).json(message);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.get('/api/messages', authenticateToken, async (req, res) => {
+  try {
+    const messages = await Message.find().sort({ createdAt: -1 });
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/messages/:id', authenticateToken, async (req, res) => {
+  try {
+    const message = await Message.findByIdAndDelete(req.params.id);
+    if (!message) return res.status(404).json({ error: 'Message not found' });
+    res.json({ message: 'Message deleted' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
