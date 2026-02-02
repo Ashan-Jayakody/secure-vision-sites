@@ -12,7 +12,33 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI)
+const mongoURI = process.env.MONGODB_URI;
+// Cloud MongoDB URIs usually look like mongodb+srv://username:password@cluster...
+// We need to encode the password part if it contains '@'
+let encodedURI = mongoURI;
+try {
+  // If the URI contains more than one '@', the password likely contains an '@'
+  if (mongoURI.includes('@') && mongoURI.indexOf('@') !== mongoURI.lastIndexOf('@')) {
+    const protocolIndex = mongoURI.indexOf('://');
+    const protocol = mongoURI.substring(0, protocolIndex + 3);
+    const rest = mongoURI.substring(protocolIndex + 3);
+    
+    const lastAtToken = rest.lastIndexOf('@');
+    const credentials = rest.substring(0, lastAtToken);
+    const hostInfo = rest.substring(lastAtToken + 1);
+    
+    const colonIndex = credentials.indexOf(':');
+    if (colonIndex !== -1) {
+      const username = credentials.substring(0, colonIndex);
+      const password = credentials.substring(colonIndex + 1);
+      encodedURI = `${protocol}${username}:${encodeURIComponent(password)}@${hostInfo}`;
+    }
+  }
+} catch (e) {
+  console.error('Error encoding MongoDB URI:', e);
+}
+
+mongoose.connect(encodedURI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
