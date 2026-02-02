@@ -80,7 +80,7 @@ const Gallery = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {albums.map((album, index) => (
               <div
-                key={album.id}
+                key={album._id}
                 className="group relative overflow-hidden rounded-xl cursor-pointer animate-scale-in opacity-0 bg-card border border-border"
                 style={{ animationDelay: `${0.1 * index}s` }}
                 onClick={() => handleAlbumClick(album)}
@@ -126,7 +126,7 @@ const Gallery = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {selectedAlbum.installations.map((installation, index) => (
                   <div
-                    key={installation.id}
+                    key={installation._id || installation.id}
                     className="group relative overflow-hidden rounded-xl cursor-pointer animate-scale-in opacity-0"
                     style={{ animationDelay: `${0.1 * (index % 6)}s` }}
                     onClick={() => handleImageClick(installation.image, index)}

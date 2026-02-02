@@ -7,9 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
-import { useAlbums, Album, Installation } from "@/hooks/useAlbums";
+import { useAlbums, Album } from "@/hooks/useAlbums";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit, LogOut, FolderPlus, Image, ArrowLeft, X } from "lucide-react";
+import { uploadImage } from "@/services/cloudinaryApi";
+import { Plus, Trash2, Edit, LogOut, FolderPlus, Image, ArrowLeft, X, Loader2 } from "lucide-react";
 
 const AdminDashboard = () => {
   const { logout } = useAuth();
@@ -20,6 +21,8 @@ const AdminDashboard = () => {
   const [isAlbumDialogOpen, setIsAlbumDialogOpen] = useState(false);
   const [isInstallationDialogOpen, setIsInstallationDialogOpen] = useState(false);
   const [editingAlbum, setEditingAlbum] = useState<Album | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Album form state
   const [albumName, setAlbumName] = useState("");
@@ -31,6 +34,7 @@ const AdminDashboard = () => {
   const [instDescription, setInstDescription] = useState("");
   const [instDate, setInstDate] = useState("");
   const [instImage, setInstImage] = useState<string>("");
+  const [instImageFile, setInstImageFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleLogout = () => {
@@ -39,35 +43,41 @@ const AdminDashboard = () => {
     toast({ title: "Logged out successfully" });
   };
 
-  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setInstImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      setInstImageFile(file);
+      // Create a preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setInstImage(previewUrl);
     }
   };
 
-  const handleCreateAlbum = () => {
+  const handleCreateAlbum = async () => {
     if (!albumName.trim()) {
       toast({ title: "Album name is required", variant: "destructive" });
       return;
     }
     
-    if (editingAlbum) {
-      updateAlbum(editingAlbum.id, { name: albumName, description: albumDescription });
-      toast({ title: "Album updated successfully" });
-    } else {
-      addAlbum({ name: albumName, description: albumDescription, installations: [] });
-      toast({ title: "Album created successfully" });
+    setIsSaving(true);
+    try {
+      if (editingAlbum) {
+        await updateAlbum(editingAlbum._id, { name: albumName, description: albumDescription });
+        toast({ title: "Album updated successfully" });
+      } else {
+        await addAlbum({ name: albumName, description: albumDescription, installations: [] });
+        toast({ title: "Album created successfully" });
+      }
+      
+      setAlbumName("");
+      setAlbumDescription("");
+      setEditingAlbum(null);
+      setIsAlbumDialogOpen(false);
+    } catch (error) {
+      toast({ title: "Failed to save album", variant: "destructive" });
+    } finally {
+      setIsSaving(false);
     }
-    
-    setAlbumName("");
-    setAlbumDescription("");
-    setEditingAlbum(null);
-    setIsAlbumDialogOpen(false);
   };
 
   const handleEditAlbum = (album: Album) => {
@@ -77,52 +87,85 @@ const AdminDashboard = () => {
     setIsAlbumDialogOpen(true);
   };
 
-  const handleDeleteAlbum = (id: string) => {
-    deleteAlbum(id);
-    if (selectedAlbum?.id === id) {
-      setSelectedAlbum(null);
+  const handleDeleteAlbum = async (id: string) => {
+    try {
+      await deleteAlbum(id);
+      if (selectedAlbum?._id === id) {
+        setSelectedAlbum(null);
+      }
+      toast({ title: "Album deleted" });
+    } catch (error) {
+      toast({ title: "Failed to delete album", variant: "destructive" });
     }
-    toast({ title: "Album deleted" });
   };
 
-  const handleCreateInstallation = () => {
+  const handleCreateInstallation = async () => {
     if (!selectedAlbum) return;
-    if (!instTitle.trim() || !instCategory.trim() || !instImage) {
+    if (!instTitle.trim() || !instCategory.trim() || (!instImage && !instImageFile)) {
       toast({ title: "Please fill in all required fields", variant: "destructive" });
       return;
     }
     
-    addInstallation(selectedAlbum.id, {
-      title: instTitle,
-      category: instCategory,
-      description: instDescription,
-      date: instDate || new Date().toISOString().split("T")[0],
-      image: instImage,
-    });
-    
-    // Reset form
-    setInstTitle("");
-    setInstCategory("");
-    setInstDescription("");
-    setInstDate("");
-    setInstImage("");
-    setIsInstallationDialogOpen(false);
-    
-    // Refresh selected album
-    const updated = albums.find((a) => a.id === selectedAlbum.id);
-    if (updated) setSelectedAlbum(updated);
-    
-    toast({ title: "Installation added successfully" });
+    setIsSaving(true);
+    try {
+      let imageUrl = instImage;
+      
+      // Upload image to Cloudinary if a file was selected
+      if (instImageFile) {
+        setIsUploading(true);
+        try {
+          const result = await uploadImage(instImageFile);
+          imageUrl = result.secure_url;
+        } catch (error) {
+          toast({ title: "Failed to upload image", variant: "destructive" });
+          setIsUploading(false);
+          setIsSaving(false);
+          return;
+        }
+        setIsUploading(false);
+      }
+      
+      await addInstallation(selectedAlbum._id, {
+        title: instTitle,
+        category: instCategory,
+        description: instDescription,
+        date: instDate || new Date().toISOString().split("T")[0],
+        image: imageUrl,
+      });
+      
+      // Reset form
+      setInstTitle("");
+      setInstCategory("");
+      setInstDescription("");
+      setInstDate("");
+      setInstImage("");
+      setInstImageFile(null);
+      setIsInstallationDialogOpen(false);
+      
+      // Refresh selected album
+      const updated = albums.find((a) => a._id === selectedAlbum._id);
+      if (updated) setSelectedAlbum(updated);
+      
+      toast({ title: "Installation added successfully" });
+    } catch (error) {
+      toast({ title: "Failed to add installation", variant: "destructive" });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleDeleteInstallation = (installationId: string) => {
+  const handleDeleteInstallation = async (installationId: string) => {
     if (!selectedAlbum) return;
-    deleteInstallation(selectedAlbum.id, installationId);
-    toast({ title: "Installation deleted" });
+    try {
+      await deleteInstallation(selectedAlbum._id, installationId);
+      toast({ title: "Installation deleted" });
+    } catch (error) {
+      toast({ title: "Failed to delete installation", variant: "destructive" });
+    }
   };
 
   // Refresh selected album when albums change
-  const currentAlbum = selectedAlbum ? albums.find((a) => a.id === selectedAlbum.id) : null;
+  const currentAlbum = selectedAlbum ? albums.find((a) => a._id === selectedAlbum._id) : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -210,7 +253,7 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {albums.map((album) => (
                 <Card
-                  key={album.id}
+                  key={album._id}
                   className="bg-card/50 border-border hover:border-primary/50 transition-colors cursor-pointer group"
                 >
                   <CardHeader className="pb-2">
@@ -241,7 +284,7 @@ const AdminDashboard = () => {
                           className="h-8 w-8 text-destructive hover:text-destructive"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDeleteAlbum(album.id);
+                            handleDeleteAlbum(album._id);
                           }}
                         >
                           <Trash2 className="w-4 h-4" />
@@ -313,6 +356,7 @@ const AdminDashboard = () => {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setInstImage("");
+                                setInstImageFile(null);
                               }}
                             >
                               <X className="w-3 h-3" />
@@ -331,7 +375,7 @@ const AdminDashboard = () => {
                           type="file"
                           accept="image/*"
                           className="hidden"
-                          onChange={handleImageUpload}
+                          onChange={handleImageSelect}
                         />
                       </div>
                     </div>
@@ -377,7 +421,21 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleCreateInstallation}>Add Installation</Button>
+                    <Button onClick={handleCreateInstallation} disabled={isSaving || isUploading}>
+                      {isUploading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : isSaving ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        "Add Installation"
+                      )}
+                    </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
@@ -394,7 +452,7 @@ const AdminDashboard = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {currentAlbum.installations.map((inst) => (
-                  <Card key={inst.id} className="bg-card/50 border-border overflow-hidden group">
+                  <Card key={inst._id || inst.id} className="bg-card/50 border-border overflow-hidden group">
                     <div className="aspect-[4/3] overflow-hidden relative">
                       <img
                         src={inst.image}
