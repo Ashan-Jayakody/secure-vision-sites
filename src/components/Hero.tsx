@@ -33,7 +33,7 @@ const Hero = () => {
 
           {/* Headline */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6 animate-fade-in opacity-0" style={{ animationDelay: "0.2s" }}>
-            Professional CCTV
+            Vintage CCTV
             <span className="text-gradient block">Installation & Monitoring</span>
           </h1>
 

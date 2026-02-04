@@ -48,7 +48,7 @@ const Features = () => {
         <div className="text-center max-w-2xl mx-auto mb-16">
           <span className="text-primary text-sm font-semibold uppercase tracking-wider">Why Choose Us</span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-4 mb-6">
-            The SecureView Difference
+            The Vintage CCTV Difference
           </h2>
           <p className="text-muted-foreground text-lg">
             We go beyond just installing cameras. Our commitment to quality 

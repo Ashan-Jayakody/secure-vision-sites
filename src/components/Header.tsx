@@ -18,8 +18,8 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <a href="#" className="flex items-center gap-2 text-foreground">
-            <Shield className="w-8 h-8 text-primary" />
-            <span className="font-bold text-xl">SecureView</span>
+            <img src="/images/logo.png" alt="Vintage CCTV Logo" className="h-10 md:h-12 w-auto" />
+            <span className="font-bold text-xl">Vintage CCTV</span>
           </a>
 
           {/* Desktop Navigation */}

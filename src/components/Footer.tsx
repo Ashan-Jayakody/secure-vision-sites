@@ -38,8 +38,8 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-2">
             <a href="#" className="flex items-center gap-2 text-foreground mb-4">
-              <Shield className="w-8 h-8 text-primary" />
-              <span className="font-bold text-xl">SecureView</span>
+              <img src="/images/logo.png" alt="Vintage CCTV Logo" className="h-10 w-auto" />
+              <span className="font-bold text-xl">Vintage CCTV</span>
             </a>
             <p className="text-muted-foreground mb-6 max-w-sm">
               Professional CCTV installation and monitoring services. 
@@ -104,7 +104,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-muted-foreground text-sm">
-            © {currentYear} SecureView. All rights reserved.
+            © {currentYear} Vintage CCTV. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <a 
