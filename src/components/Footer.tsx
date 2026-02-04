@@ -38,8 +38,8 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-2">
             <a href="#" className="flex items-center gap-2 text-foreground mb-4">
-              <img src="/images/logo.png" alt="Vintage CCTV Logo" className="h-10 w-auto" />
-              <span className="font-bold text-xl">Vintage CCTV</span>
+              <img src="/images/logo.png" alt="Vintage CCTV Logo" className="h-14 w-auto" />
+              <span className="font-bold text-2xl">Vintage CCTV</span>
             </a>
             <p className="text-muted-foreground mb-6 max-w-sm">
               Professional CCTV installation and monitoring services. 
