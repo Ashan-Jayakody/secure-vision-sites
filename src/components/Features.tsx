@@ -42,7 +42,7 @@ const stats = [
 
 const Features = () => {
   return (
-    <section id="features" className="py-20 md:py-32 bg-gradient-dark">
+    <section id="features" className="py-20 md:py-32 bg-gradient-light">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
