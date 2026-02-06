@@ -17,7 +17,7 @@ const Hero = () => {
         style={{
           backgroundImage: `url(${heroBg})`,
           backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundPosition: "60% center",
         }}
       >
         <div className="absolute inset-0 bg-background/75" />
