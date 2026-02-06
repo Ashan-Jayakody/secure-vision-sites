@@ -85,14 +85,59 @@ const Gallery = () => {
                 style={{ animationDelay: `${0.1 * index}s` }}
                 onClick={() => handleAlbumClick(album)}
               >
-                {/* Album Cover - First installation image or placeholder */}
-                <div className="aspect-[4/3] overflow-hidden">
+                {/* Album Cover - Split layout for up to 3 images */}
+                <div className="aspect-[4/3] overflow-hidden flex">
                   {album.installations.length > 0 ? (
-                    <img
-                      src={album.installations[0].image}
-                      alt={album.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
+                    album.installations.length === 1 ? (
+                      <img
+                        src={album.installations[0].image}
+                        alt={album.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    ) : album.installations.length === 2 ? (
+                      <>
+                        <div className="w-1/2 h-full border-r border-background/20 overflow-hidden">
+                          <img
+                            src={album.installations[0].image}
+                            alt={album.name}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                        </div>
+                        <div className="w-1/2 h-full overflow-hidden">
+                          <img
+                            src={album.installations[1].image}
+                            alt={album.name}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-2/3 h-full border-r border-background/20 overflow-hidden">
+                          <img
+                            src={album.installations[0].image}
+                            alt={album.name}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                        </div>
+                        <div className="w-1/3 h-full flex flex-col">
+                          <div className="h-1/2 border-b border-background/20 overflow-hidden">
+                            <img
+                              src={album.installations[1].image}
+                              alt={album.name}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            />
+                          </div>
+                          <div className="h-1/2 overflow-hidden">
+                            <img
+                              src={album.installations[2].image}
+                              alt={album.name}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )
                   ) : (
                     <div className="w-full h-full bg-muted flex items-center justify-center">
                       <span className="text-muted-foreground">No images</span>
