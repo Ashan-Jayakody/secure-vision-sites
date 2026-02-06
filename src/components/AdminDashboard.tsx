@@ -38,7 +38,8 @@ const AdminDashboard = () => {
   const [instDescription, setInstDescription] = useState("");
   const [instDate, setInstDate] = useState("");
   const [instImage, setInstImage] = useState<string>("");
-  const [instImageFile, setInstImageFile] = useState<File | null>(null);
+  const [instImageFiles, setInstImageFiles] = useState<File[]>([]);
+  const [instImagePreviews, setInstImagePreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleLogout = () => {
@@ -48,13 +49,30 @@ const AdminDashboard = () => {
   };
 
   const handleImageSelect = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setInstImageFile(file);
-      // Create a preview URL
-      const previewUrl = URL.createObjectURL(file);
-      setInstImage(previewUrl);
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const newFiles = [...instImageFiles, ...files].slice(0, 6);
+      setInstImageFiles(newFiles);
+      
+      // Create preview URLs
+      const previews = newFiles.map(file => URL.createObjectURL(file));
+      setInstImagePreviews(previews);
+      
+      if (files.length + instImageFiles.length > 6) {
+        toast({ title: "Maximum 6 images allowed", variant: "destructive" });
+      }
     }
+  };
+
+  const removeImage = (index: number) => {
+    const newFiles = [...instImageFiles];
+    newFiles.splice(index, 1);
+    setInstImageFiles(newFiles);
+    
+    const newPreviews = [...instImagePreviews];
+    URL.revokeObjectURL(newPreviews[index]);
+    newPreviews.splice(index, 1);
+    setInstImagePreviews(newPreviews);
   };
 
   const handleCreateAlbum = async () => {
@@ -105,37 +123,41 @@ const AdminDashboard = () => {
 
   const handleCreateInstallation = async () => {
     if (!selectedAlbum) return;
-    if (!instTitle.trim() || !instCategory.trim() || (!instImage && !instImageFile)) {
+    if (!instTitle.trim() || !instCategory.trim() || (instImagePreviews.length === 0)) {
       toast({ title: "Please fill in all required fields", variant: "destructive" });
       return;
     }
     
     setIsSaving(true);
     try {
-      let imageUrl = instImage;
+      setIsUploading(true);
+      const uploadedUrls: string[] = [];
       
-      // Upload image to Cloudinary if a file was selected
-      if (instImageFile) {
-        setIsUploading(true);
+      for (const file of instImageFiles) {
         try {
-          const result = await uploadImage(instImageFile);
-          imageUrl = result.secure_url;
+          const result = await uploadImage(file);
+          uploadedUrls.push(result.secure_url);
         } catch (error) {
-          toast({ title: "Failed to upload image", variant: "destructive" });
-          setIsUploading(false);
-          setIsSaving(false);
-          return;
+          toast({ title: `Failed to upload image: ${file.name}`, variant: "destructive" });
         }
-        setIsUploading(false);
       }
-      
-      await addInstallation(selectedAlbum._id, {
-        title: instTitle,
-        category: instCategory,
-        description: instDescription,
-        date: instDate || new Date().toISOString().split("T")[0],
-        image: imageUrl,
-      });
+      setIsUploading(false);
+
+      if (uploadedUrls.length === 0) {
+        setIsSaving(false);
+        return;
+      }
+
+      // Create an installation for each uploaded image
+      for (const imageUrl of uploadedUrls) {
+        await addInstallation(selectedAlbum._id, {
+          title: instTitle,
+          category: instCategory,
+          description: instDescription,
+          date: instDate || new Date().toISOString().split("T")[0],
+          image: imageUrl,
+        });
+      }
       
       // Reset form
       setInstTitle("");
@@ -143,12 +165,13 @@ const AdminDashboard = () => {
       setInstDescription("");
       setInstDate("");
       setInstImage("");
-      setInstImageFile(null);
+      setInstImageFiles([]);
+      setInstImagePreviews([]);
       setIsInstallationDialogOpen(false);
       
-      toast({ title: "Installation added successfully" });
+      toast({ title: `${uploadedUrls.length} installation(s) added successfully` });
     } catch (error) {
-      toast({ title: "Failed to add installation", variant: "destructive" });
+      toast({ title: "Failed to add installations", variant: "destructive" });
     } finally {
       setIsSaving(false);
     }
@@ -355,36 +378,44 @@ const AdminDashboard = () => {
                       </DialogHeader>
                       <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
                         <div className="space-y-2">
-                          <Label className="text-foreground">Image *</Label>
+                          <Label className="text-foreground">Images (Max 6) *</Label>
                           <div
                             className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
                             onClick={() => fileInputRef.current?.click()}
                           >
-                            {instImage ? (
-                              <div className="relative">
-                                <img
-                                  src={instImage}
-                                  alt="Preview"
-                                  className="max-h-40 mx-auto rounded"
-                                />
-                                <Button
-                                  variant="destructive"
-                                  size="icon"
-                                  className="absolute top-0 right-0 h-6 w-6"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setInstImage("");
-                                    setInstImageFile(null);
-                                  }}
-                                >
-                                  <X className="w-3 h-3" />
-                                </Button>
+                            {instImagePreviews.length > 0 ? (
+                              <div className="grid grid-cols-3 gap-2">
+                                {instImagePreviews.map((preview, index) => (
+                                  <div key={index} className="relative group/img">
+                                    <img
+                                      src={preview}
+                                      alt={`Preview ${index}`}
+                                      className="aspect-square object-cover rounded"
+                                    />
+                                    <Button
+                                      variant="destructive"
+                                      size="icon"
+                                      className="absolute -top-1 -right-1 h-5 w-5 opacity-0 group-hover/img:opacity-100 transition-opacity"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        removeImage(index);
+                                      }}
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                ))}
+                                {instImagePreviews.length < 6 && (
+                                  <div className="aspect-square flex items-center justify-center border border-dashed border-border rounded">
+                                    <Plus className="w-6 h-6 text-muted-foreground" />
+                                  </div>
+                                )}
                               </div>
                             ) : (
                               <>
                                 <Image className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
                                 <p className="text-sm text-muted-foreground">
-                                  Click to upload an image
+                                  Click to upload up to 6 images
                                 </p>
                               </>
                             )}
@@ -392,6 +423,7 @@ const AdminDashboard = () => {
                               ref={fileInputRef}
                               type="file"
                               accept="image/*"
+                              multiple
                               className="hidden"
                               onChange={handleImageSelect}
                             />
