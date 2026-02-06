@@ -5,6 +5,7 @@ export interface Installation {
   _id?: string;
   id?: string;
   image: string;
+  video?: string;
   title: string;
   category: string;
   description?: string;

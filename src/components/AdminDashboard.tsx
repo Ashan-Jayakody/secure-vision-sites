@@ -10,8 +10,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAlbums, Album } from "@/hooks/useAlbums";
 import { useMessages } from "@/hooks/useMessages";
 import { toast } from "@/hooks/use-toast";
-import { uploadImage } from "@/services/cloudinaryApi";
-import { Plus, Trash2, Edit, LogOut, FolderPlus, Image, ArrowLeft, X, Loader2, Mail, LayoutDashboard, Settings, Phone } from "lucide-react";
+import { uploadMedia } from "@/services/cloudinaryApi";
+import { Plus, Trash2, Edit, LogOut, FolderPlus, Image, ArrowLeft, X, Loader2, Mail, LayoutDashboard, Settings, Phone, Video } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AdminDashboard = () => {
@@ -40,7 +40,9 @@ const AdminDashboard = () => {
   const [instImage, setInstImage] = useState<string>("");
   const [instImageFiles, setInstImageFiles] = useState<File[]>([]);
   const [instImagePreviews, setInstImagePreviews] = useState<string[]>([]);
+  const [instVideoFile, setInstVideoFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const handleLogout = () => {
     logout();
@@ -123,7 +125,7 @@ const AdminDashboard = () => {
 
   const handleCreateInstallation = async () => {
     if (!selectedAlbum) return;
-    if (!instTitle.trim() || !instCategory.trim() || (instImagePreviews.length === 0)) {
+    if (!instTitle.trim() || !instCategory.trim() || (instImagePreviews.length === 0 && !instVideoFile)) {
       toast({ title: "Please fill in all required fields", variant: "destructive" });
       return;
     }
@@ -132,10 +134,21 @@ const AdminDashboard = () => {
     try {
       setIsUploading(true);
       const uploadedUrls: string[] = [];
+      let videoUrl = "";
+
+      // Upload video if selected
+      if (instVideoFile) {
+        try {
+          const result = await uploadMedia(instVideoFile);
+          videoUrl = result.secure_url;
+        } catch (error) {
+          toast({ title: "Failed to upload video", variant: "destructive" });
+        }
+      }
       
       for (const file of instImageFiles) {
         try {
-          const result = await uploadImage(file);
+          const result = await uploadMedia(file);
           uploadedUrls.push(result.secure_url);
         } catch (error) {
           toast({ title: `Failed to upload image: ${file.name}`, variant: "destructive" });
@@ -143,20 +156,33 @@ const AdminDashboard = () => {
       }
       setIsUploading(false);
 
-      if (uploadedUrls.length === 0) {
+      if (uploadedUrls.length === 0 && !videoUrl) {
         setIsSaving(false);
         return;
       }
 
-      // Create an installation for each uploaded image
-      for (const imageUrl of uploadedUrls) {
+      // If we have a video and images, we can attach the video to each image installation
+      // If we only have a video, we create one installation with a placeholder/thumbnail image
+      if (uploadedUrls.length === 0 && videoUrl) {
         await addInstallation(selectedAlbum._id, {
           title: instTitle,
           category: instCategory,
           description: instDescription,
           date: instDate || new Date().toISOString().split("T")[0],
-          image: imageUrl,
+          image: "https://res.cloudinary.com/dh3sza0e8/image/upload/v1/placeholder_video.png", // Fallback thumbnail
+          video: videoUrl,
         });
+      } else {
+        for (const imageUrl of uploadedUrls) {
+          await addInstallation(selectedAlbum._id, {
+            title: instTitle,
+            category: instCategory,
+            description: instDescription,
+            date: instDate || new Date().toISOString().split("T")[0],
+            image: imageUrl,
+            video: videoUrl,
+          });
+        }
       }
       
       // Reset form
@@ -167,6 +193,7 @@ const AdminDashboard = () => {
       setInstImage("");
       setInstImageFiles([]);
       setInstImagePreviews([]);
+      setInstVideoFile(null);
       setIsInstallationDialogOpen(false);
       
       toast({ title: `${uploadedUrls.length} installation(s) added successfully` });
@@ -187,7 +214,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Refresh selected album when albums change
   const currentAlbum = selectedAlbum ? albums.find((a) => a._id === selectedAlbum._id) : null;
 
   return (
@@ -426,6 +452,48 @@ const AdminDashboard = () => {
                               multiple
                               className="hidden"
                               onChange={handleImageSelect}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-foreground">Video (Optional)</Label>
+                          <div
+                            className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                            onClick={() => videoInputRef.current?.click()}
+                          >
+                            {instVideoFile ? (
+                              <div className="flex items-center justify-between bg-secondary p-2 rounded">
+                                <span className="text-sm truncate max-w-[200px]">{instVideoFile.name}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setInstVideoFile(null);
+                                  }}
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <>
+                                <Video className="w-6 h-6 mx-auto text-muted-foreground mb-1" />
+                                <p className="text-xs text-muted-foreground">
+                                  Click to upload a video
+                                </p>
+                              </>
+                            )}
+                            <input
+                              ref={videoInputRef}
+                              type="file"
+                              accept="video/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) setInstVideoFile(file);
+                              }}
                             />
                           </div>
                         </div>

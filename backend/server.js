@@ -46,6 +46,7 @@ mongoose.connect(encodedURI)
 // Schemas
 const installationSchema = new mongoose.Schema({
   image: { type: String, required: true }, // Cloudinary URL
+  video: String, // Optional video URL
   title: { type: String, required: true },
   category: { type: String, required: true },
   description: String,

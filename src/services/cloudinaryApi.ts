@@ -7,13 +7,14 @@ export interface CloudinaryUploadResult {
   height: number;
 }
 
-export const uploadImage = async (file: File): Promise<CloudinaryUploadResult> => {
+export const uploadMedia = async (file: File): Promise<CloudinaryUploadResult> => {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
   
+  const resourceType = file.type.startsWith('video/') ? 'video' : 'image';
   const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`,
     {
       method: 'POST',
       body: formData,
@@ -21,7 +22,7 @@ export const uploadImage = async (file: File): Promise<CloudinaryUploadResult> =
   );
   
   if (!response.ok) {
-    throw new Error('Failed to upload image to Cloudinary');
+    throw new Error(`Failed to upload ${resourceType} to Cloudinary`);
   }
   
   return response.json();

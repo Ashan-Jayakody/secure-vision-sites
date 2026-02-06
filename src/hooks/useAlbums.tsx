@@ -9,7 +9,18 @@ import gallery5 from "@/assets/gallery-5.jpg";
 import gallery6 from "@/assets/gallery-6.jpg";
 
 // Re-export types for backwards compatibility
-export type { Album, Installation };
+export type { Album };
+
+export interface Installation {
+  _id?: string;
+  id?: string;
+  image: string;
+  video?: string;
+  title: string;
+  category: string;
+  description?: string;
+  date: string;
+}
 
 // Fallback data when API is unavailable
 const fallbackAlbums: Album[] = [

@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { X, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ArrowLeft, Play } from "lucide-react";
 import { useAlbums, Installation, Album } from "@/hooks/useAlbums";
 
 const Gallery = () => {
   const { albums, isLoading } = useAlbums();
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handleAlbumClick = (album: Album) => {
@@ -17,24 +18,26 @@ const Gallery = () => {
     setSelectedAlbum(null);
   };
 
-  const handleImageClick = (image: string, index: number) => {
+  const handleImageClick = (image: string, index: number, video?: string) => {
     setSelectedImage(image);
     setCurrentImageIndex(index);
+    setSelectedVideo(video || null);
   };
 
   const navigateImage = (direction: "prev" | "next") => {
     if (!selectedAlbum) return;
     const installations = selectedAlbum.installations;
     
+    let newIndex;
     if (direction === "prev") {
-      const newIndex = currentImageIndex > 0 ? currentImageIndex - 1 : installations.length - 1;
-      setCurrentImageIndex(newIndex);
-      setSelectedImage(installations[newIndex].image);
+      newIndex = currentImageIndex > 0 ? currentImageIndex - 1 : installations.length - 1;
     } else {
-      const newIndex = currentImageIndex < installations.length - 1 ? currentImageIndex + 1 : 0;
-      setCurrentImageIndex(newIndex);
-      setSelectedImage(installations[newIndex].image);
+      newIndex = currentImageIndex < installations.length - 1 ? currentImageIndex + 1 : 0;
     }
+    
+    setCurrentImageIndex(newIndex);
+    setSelectedImage(installations[newIndex].image);
+    setSelectedVideo(installations[newIndex].video || null);
   };
 
   if (isLoading) {
@@ -174,19 +177,40 @@ const Gallery = () => {
                     key={installation._id || installation.id}
                     className="group relative overflow-hidden rounded-xl cursor-pointer animate-scale-in opacity-0"
                     style={{ animationDelay: `${0.1 * (index % 6)}s` }}
-                    onClick={() => handleImageClick(installation.image, index)}
+                    onClick={() => handleImageClick(installation.image, index, installation.video)}
                   >
                     <div className="aspect-[4/3] overflow-hidden">
-                      <img
-                        src={installation.image}
-                        alt={installation.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
+                      {installation.video ? (
+                        <video 
+                          src={installation.video} 
+                          className="w-full h-full object-cover" 
+                          muted 
+                          onMouseOver={e => e.currentTarget.play()}
+                          onMouseOut={e => {
+                            e.currentTarget.pause();
+                            e.currentTarget.currentTime = 0;
+                          }}
+                          loop
+                        />
+                      ) : (
+                        <img
+                          src={installation.image}
+                          alt={installation.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      )}
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="absolute bottom-0 left-0 right-0 p-6">
-                        <span className="text-primary text-sm font-medium">{installation.category}</span>
-                        <h3 className="text-foreground text-xl font-semibold mt-1">{installation.title}</h3>
+                      <div className="absolute bottom-0 left-0 right-0 p-6 flex items-center justify-between">
+                        <div>
+                          <span className="text-primary text-sm font-medium">{installation.category}</span>
+                          <h3 className="text-foreground text-xl font-semibold mt-1">{installation.title}</h3>
+                        </div>
+                        {installation.video && (
+                          <div className="w-10 h-10 rounded-full bg-primary/20 backdrop-blur-sm flex items-center justify-center border border-primary/30">
+                            <Play className="w-5 h-5 text-primary fill-primary ml-0.5" />
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -198,10 +222,18 @@ const Gallery = () => {
       </div>
 
       {/* Lightbox Dialog with Navigation */}
-      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+      <Dialog open={!!selectedImage} onOpenChange={(open) => {
+        if (!open) {
+          setSelectedImage(null);
+          setSelectedVideo(null);
+        }
+      }}>
         <DialogContent className="max-w-4xl bg-background border-border p-0 overflow-hidden">
           <button
-            onClick={() => setSelectedImage(null)}
+            onClick={() => {
+              setSelectedImage(null);
+              setSelectedVideo(null);
+            }}
             className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-background/80 flex items-center justify-center text-foreground hover:bg-background transition-colors"
           >
             <X className="w-5 h-5" />
@@ -225,12 +257,23 @@ const Gallery = () => {
           )}
           
           {selectedImage && selectedAlbum && (
-            <div>
-              <img
-                src={selectedImage}
-                alt="Project detail"
-                className="w-full h-auto"
-              />
+            <div className="flex flex-col">
+              <div className="relative aspect-video bg-black flex items-center justify-center">
+                {selectedVideo ? (
+                  <video 
+                    src={selectedVideo} 
+                    className="w-full h-full" 
+                    controls 
+                    autoPlay
+                  />
+                ) : (
+                  <img
+                    src={selectedImage}
+                    alt="Project detail"
+                    className="max-h-[80vh] w-auto"
+                  />
+                )}
+              </div>
               {selectedAlbum.installations[currentImageIndex] && (
                 <div className="p-4 bg-card">
                   <span className="text-primary text-sm font-medium">
