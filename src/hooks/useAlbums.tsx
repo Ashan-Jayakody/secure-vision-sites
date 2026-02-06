@@ -1,26 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { albumsApi, Album, Installation } from "@/services/albumsApi";
 
-import gallery1 from "@/assets/gallery-1.jpg";
-import gallery2 from "@/assets/gallery-2.jpg";
-import gallery3 from "@/assets/gallery-3.jpg";
-import gallery4 from "@/assets/gallery-4.jpg";
-import gallery5 from "@/assets/gallery-5.jpg";
-import gallery6 from "@/assets/gallery-6.jpg";
-
 // Re-export types for backwards compatibility
-export type { Album };
-
-export interface Installation {
-  _id?: string;
-  id?: string;
-  image: string;
-  video?: string;
-  title: string;
-  category: string;
-  description?: string;
-  date: string;
-}
+export type { Album, Installation };
 
 // Fallback data when API is unavailable
 const fallbackAlbums: Album[] = [
@@ -29,12 +11,12 @@ const fallbackAlbums: Album[] = [
     name: "Recent Installations",
     description: "Our latest CCTV installations across various industries",
     installations: [
-      { _id: "1", image: gallery1, title: "Corporate Office", category: "Commercial", date: "2024-01-15" },
-      { _id: "2", image: gallery2, title: "Residential Home", category: "Residential", date: "2024-01-10" },
-      { _id: "3", image: gallery3, title: "Warehouse Facility", category: "Industrial", date: "2024-01-05" },
-      { _id: "4", image: gallery4, title: "Retail Store", category: "Commercial", date: "2023-12-20" },
-      { _id: "5", image: gallery5, title: "Parking Lot", category: "Outdoor", date: "2023-12-15" },
-      { _id: "6", image: gallery6, title: "Financial Institution", category: "Commercial", date: "2023-12-10" },
+      { _id: "1", image: "/assets/gallery-1.jpg", title: "Corporate Office", category: "Commercial", date: "2024-01-15" },
+      { _id: "2", image: "/assets/gallery-2.jpg", title: "Residential Home", category: "Residential", date: "2024-01-10" },
+      { _id: "3", image: "/assets/gallery-3.jpg", title: "Warehouse Facility", category: "Industrial", date: "2024-01-05" },
+      { _id: "4", image: "/assets/gallery-4.jpg", title: "Retail Store", category: "Commercial", date: "2023-12-20" },
+      { _id: "5", image: "/assets/gallery-5.jpg", title: "Parking Lot", category: "Outdoor", date: "2023-12-15" },
+      { _id: "6", image: "/assets/gallery-6.jpg", title: "Financial Institution", category: "Commercial", date: "2023-12-10" },
     ],
     createdAt: "2024-01-01",
   },
