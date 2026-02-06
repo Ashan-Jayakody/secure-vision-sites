@@ -1,10 +1,17 @@
 import { Eye, Wifi, Moon, Cloud, Shield, Cpu } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import cameraDome from "@/assets/camera-dome.jpg";
+import cameraBullet from "@/assets/camera-bullet.jpg";
+import cameraPtz from "@/assets/camera-ptz.jpg";
+import cameraWireless from "@/assets/camera-wireless.jpg";
+import cameraNvr from "@/assets/camera-nvr.jpg";
+import cameraThermal from "@/assets/camera-thermal.jpg";
 
 const cameras = [
   {
     name: "Dome Camera",
     tagline: "Indoor & Ceiling Mount",
+    image: cameraDome,
     description:
       "Discreet ceiling-mounted cameras ideal for offices, retail stores, and indoor spaces. Vandal-resistant design with wide-angle coverage.",
     features: [
@@ -16,6 +23,7 @@ const cameras = [
   {
     name: "Bullet Camera",
     tagline: "Outdoor & Long Range",
+    image: cameraBullet,
     description:
       "Weatherproof outdoor cameras built for perimeter surveillance. Long-range infrared capabilities for large area coverage.",
     features: [
@@ -27,6 +35,7 @@ const cameras = [
   {
     name: "PTZ Camera",
     tagline: "Pan-Tilt-Zoom Control",
+    image: cameraPtz,
     description:
       "Motorized cameras with remote pan, tilt, and zoom control. Perfect for active monitoring of large areas and parking lots.",
     features: [
@@ -38,6 +47,7 @@ const cameras = [
   {
     name: "Wireless IP Camera",
     tagline: "WiFi Connected",
+    image: cameraWireless,
     description:
       "Easy-to-install wireless cameras with smartphone access. Stream live footage from anywhere with cloud recording support.",
     features: [
@@ -49,6 +59,7 @@ const cameras = [
   {
     name: "NVR System",
     tagline: "Network Video Recorder",
+    image: cameraNvr,
     description:
       "Centralized recording systems for managing multiple cameras. Supports up to 32 channels with intelligent playback and search.",
     features: [
@@ -60,6 +71,7 @@ const cameras = [
   {
     name: "Thermal Camera",
     tagline: "Heat Detection",
+    image: cameraThermal,
     description:
       "Advanced thermal imaging for perimeter security and fire detection. Works in complete darkness and adverse weather conditions.",
     features: [
@@ -96,6 +108,16 @@ const CameraProducts = () => {
               className="bg-gradient-card border-border overflow-hidden hover:border-primary/50 transition-all duration-300 group animate-fade-in-up opacity-0"
               style={{ animationDelay: `${0.1 * index}s` }}
             >
+              {/* Camera Image */}
+              <div className="h-48 overflow-hidden bg-muted/30">
+                <img
+                  src={camera.image}
+                  alt={camera.name}
+                  className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+              </div>
+
               {/* Card Header */}
               <div className="p-6 pb-4">
                 <div className="flex items-start justify-between mb-3">
