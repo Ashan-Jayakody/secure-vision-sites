@@ -241,10 +241,11 @@ app.get('/api/health', (req, res) => {
 // Serve Vite frontend (dist is at project root)
 app.use(express.static(path.join(__dirname, '../dist')));
 
-app.get('/*', (req, res) => {
+app.get('/:path(*)', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
