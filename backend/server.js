@@ -17,32 +17,36 @@ const mongoURI = process.env.MONGODB_URI;
 // Cloud MongoDB URIs usually look like mongodb+srv://username:password@cluster...
 // We need to encode the password part if it contains '@'
 let encodedURI = mongoURI;
-try {
-  // If the URI contains more than one '@', the password likely contains an '@'
-  if (mongoURI.includes('@') && mongoURI.indexOf('@') !== mongoURI.lastIndexOf('@')) {
-    const protocolIndex = mongoURI.indexOf('://');
-    const protocol = mongoURI.substring(0, protocolIndex + 3);
-    const rest = mongoURI.substring(protocolIndex + 3);
-    
-    const lastAtToken = rest.lastIndexOf('@');
-    const credentials = rest.substring(0, lastAtToken);
-    const hostInfo = rest.substring(lastAtToken + 1);
-    
-    const colonIndex = credentials.indexOf(':');
-    if (colonIndex !== -1) {
-      const username = credentials.substring(0, colonIndex);
-      const password = credentials.substring(colonIndex + 1);
-      encodedURI = `${protocol}${username}:${encodeURIComponent(password)}@${hostInfo}`;
+if (mongoURI) {
+  try {
+    // Encode password if URI contains special characters like '@'
+    if (mongoURI.includes('@') && mongoURI.indexOf('@') !== mongoURI.lastIndexOf('@')) {
+      const protocolIndex = mongoURI.indexOf('://');
+      const protocol = mongoURI.substring(0, protocolIndex + 3);
+      const rest = mongoURI.substring(protocolIndex + 3);
+      
+      const lastAtToken = rest.lastIndexOf('@');
+      const credentials = rest.substring(0, lastAtToken);
+      const hostInfo = rest.substring(lastAtToken + 1);
+      
+      const colonIndex = credentials.indexOf(':');
+      if (colonIndex !== -1) {
+        const username = credentials.substring(0, colonIndex);
+        const password = credentials.substring(colonIndex + 1);
+        encodedURI = `${protocol}${username}:${encodeURIComponent(password)}@${hostInfo}`;
+      }
     }
+  } catch (e) {
+    console.error('Error encoding MongoDB URI:', e);
   }
-} catch (e) {
-  console.error('Error encoding MongoDB URI:', e);
+
+  mongoose.connect(encodedURI)
+    .then(() => console.log('✅ Connected to MongoDB'))
+    .catch(err => console.error('❌ MongoDB connection error:', err));
+} else {
+  // Graceful error logging if Render environment variables are missing [cite: 6, 91]
+  console.error('❌ FATAL ERROR: MONGODB_URI is not defined in the Environment settings.');
 }
-
-mongoose.connect(encodedURI)
-  .then(() => console.log('✅ Connected to MongoDB'))
-  .catch(err => console.error('❌ MongoDB connection error:', err));
-
 // Schemas
 const installationSchema = new mongoose.Schema({
   image: { type: String, required: true }, // Cloudinary URL
@@ -237,7 +241,7 @@ app.get('/api/health', (req, res) => {
 // Serve Vite frontend (dist is at project root)
 app.use(express.static(path.join(__dirname, '../dist')));
 
-app.get('(.*)', (req, res) => {
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist', 'index.html'));
 });
 
