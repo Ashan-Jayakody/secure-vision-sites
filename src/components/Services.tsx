@@ -51,11 +51,11 @@ const Services = () => {
         </div>
 
         {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {services.map((service, index) => (
             <Card 
               key={service.title}
-              className="glass p-8 group cursor-pointer animate-fade-in-up opacity-0 rounded-2xl border-white/40"
+              className="glass p-6 sm:p-8 group cursor-pointer animate-fade-in-up opacity-0 rounded-2xl border-white/40"
               style={{ animationDelay: `${0.1 * index}s` }}
             >
               <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-sm border border-primary/10">

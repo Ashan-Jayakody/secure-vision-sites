@@ -57,15 +57,15 @@ const Features = () => {
         </div>
 
         {/* Stats Bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-12 sm:mb-20">
           {stats.map((stat, index) => (
             <div 
               key={stat.label}
-              className="text-center p-8 rounded-2xl glass shadow-sm hover:shadow-md transition-shadow animate-fade-in opacity-0"
+              className="text-center p-4 sm:p-6 md:p-8 rounded-2xl glass shadow-sm hover:shadow-md transition-shadow animate-fade-in opacity-0"
               style={{ animationDelay: `${0.1 * index}s` }}
             >
-              <div className="text-4xl md:text-5xl font-display font-extrabold text-gradient mb-3">{stat.value}</div>
-              <div className="text-foreground font-medium tracking-wide uppercase text-sm opacity-80">{stat.label}</div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-gradient mb-2 sm:mb-3">{stat.value}</div>
+              <div className="text-foreground font-medium tracking-wide uppercase text-xs sm:text-sm opacity-80">{stat.label}</div>
             </div>
           ))}
         </div>

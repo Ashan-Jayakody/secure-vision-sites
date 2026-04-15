@@ -18,7 +18,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <a href="#" className="flex items-center gap-2 text-foreground group">
-            <img src="/images/logo.png" alt="Vintage CCTV Logo" className="h-14 md:h-52 w-auto mt-6 group-hover:opacity-90 transition-opacity" />
+            <img src="/images/logo.png" alt="Vintage CCTV Logo" className="h-10 md:h-56 mt-8 w-auto group-hover:opacity-90 transition-opacity" />
 
           </a>
 

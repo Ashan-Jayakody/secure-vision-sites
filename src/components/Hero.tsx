@@ -32,23 +32,23 @@ const Hero = () => {
           </div>
 
           {/* Headline */}
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-extrabold text-gradient leading-[1.1] mb-6 animate-fade-in opacity-0 tracking-tight" style={{ animationDelay: "0.2s" }}>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-extrabold text-gradient leading-[1.1] mb-6 animate-fade-in opacity-0 tracking-tight" style={{ animationDelay: "0.2s" }}>
             Vintage CCTV
             <span className="text-foreground block mt-2">Installation & Monitoring</span>
           </h1>
 
           {/* Subheadline */}
-          <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-xl animate-fade-in opacity-0 leading-relaxed" style={{ animationDelay: "0.3s" }}>
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-10 max-w-xl animate-fade-in opacity-0 leading-relaxed" style={{ animationDelay: "0.3s" }}>
             Protect what matters most with cutting-edge surveillance systems. 
             Expert installation, maintenance, and 24/7 support.
           </p>
 
           {/* Benefits */}
-          <div className="flex flex-wrap gap-6 mb-12 animate-fade-in opacity-0" style={{ animationDelay: "0.4s" }}>
+          <div className="flex flex-wrap gap-3 sm:gap-6 mb-12 animate-fade-in opacity-0" style={{ animationDelay: "0.4s" }}>
             {benefits.map((benefit) => (
-              <div key={benefit} className="flex items-center gap-3 text-muted-foreground bg-white/50 backdrop-blur-sm px-4 py-2 rounded-full border border-border/50">
-                <CheckCircle className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">{benefit}</span>
+              <div key={benefit} className="flex items-center gap-2 sm:gap-3 text-muted-foreground bg-white/50 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-full border border-border/50">
+                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                <span className="text-xs sm:text-sm font-medium">{benefit}</span>
               </div>
             ))}
           </div>
@@ -57,7 +57,7 @@ const Hero = () => {
           <div className="flex flex-col sm:flex-row gap-4 animate-fade-in opacity-0" style={{ animationDelay: "0.5s" }}>
             <Button 
               size="lg" 
-              className="bg-gradient-primary text-primary-foreground font-semibold shadow-glow hover:opacity-90 hover:-translate-y-0.5 transition-all text-base px-8 h-14 rounded-full"
+              className="w-full sm:w-auto bg-gradient-primary text-primary-foreground font-semibold shadow-glow hover:opacity-90 hover:-translate-y-0.5 transition-all text-base px-8 h-14 rounded-full"
             >
               Get Free Quote
               <ArrowRight className="w-5 h-5 ml-2" />

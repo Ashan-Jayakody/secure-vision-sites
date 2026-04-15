@@ -127,24 +127,24 @@ const CameraProducts = () => {
               </div>
 
               {/* Card Header */}
-              <div className="p-8 pb-4 flex-1">
+              <div className="p-6 sm:p-8 pb-4 flex-1">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-2xl font-display font-bold text-foreground mb-1">
+                    <h3 className="text-xl sm:text-2xl font-display font-bold text-foreground mb-1">
                       {camera.name}
                     </h3>
-                    <span className="text-primary text-sm font-semibold tracking-wide uppercase opacity-90">
+                    <span className="text-primary text-xs sm:text-sm font-semibold tracking-wide uppercase opacity-90">
                       {camera.tagline}
                     </span>
                   </div>
                 </div>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
                   {camera.description}
                 </p>
               </div>
 
               {/* Feature Pills */}
-              <div className="px-8 pb-6">
+              <div className="px-6 sm:px-8 pb-6">
                 <div className="flex flex-wrap gap-2">
                   {camera.features.map((feature) => (
                     <div
@@ -159,7 +159,7 @@ const CameraProducts = () => {
               </div>
 
               {/* Action */}
-              <div className="px-8 pb-8 mt-auto flex items-end">
+              <div className="px-6 sm:px-8 pb-6 sm:pb-8 mt-auto flex items-end">
                 <Button 
                   asChild
                   className="w-full gap-2 transition-all hover:-translate-y-0.5 rounded-xl h-12 shadow-sm font-semibold" 
