@@ -42,20 +42,20 @@ const TrustedBrands = () => {
         </div>
 
         {/* Brands Grid */}
-        <div className="  mx-28 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-28 ">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-12 lg:gap-20 max-w-5xl mx-auto px-4 sm:px-0">
           {brands.map((brand, index) => (
             <div
               key={brand.name}
-              className="group relative p-6 rounded-xl bg-gradient-card border border-border text-center hover:border-primary/40 hover:shadow-glow transition-all duration-300 animate-fade-in opacity-0"
+              className="group relative p-6 rounded-2xl glass border border-white/40 text-center hover:shadow-lg transition-all duration-300 animate-fade-in opacity-0"
               style={{ animationDelay: `${0.08 * index}s` }}
             >
-              <div className="w-18 h-18 mx-auto mb-4 rounded-full bg-white overflow-hidden flex items-center justify-center  group-hover:bg-primary/20 transition-colors">
-                <img src={brand.image} className="w-full h-full object-contain "/>
+              <div className="w-28 h-28 mx-auto mb-5 rounded-full bg-white/80 overflow-hidden flex items-center justify-center p-2 shadow-sm group-hover:scale-105 transition-transform duration-300">
+                <img src={brand.image} alt={brand.name} className="w-full h-full object-contain" />
               </div>
-              <h3 className="text-sm font-semibold text-foreground mb-1">
+              <h3 className="text-base sm:text-lg font-display font-bold text-foreground mb-1">
                 {brand.name}
               </h3>
-              <span className="text-sm text-primary font-medium">
+              <span className="text-xs sm:text-sm text-primary font-semibold uppercase tracking-wide opacity-90">
                 {brand.specialty}
               </span>
             </div>
