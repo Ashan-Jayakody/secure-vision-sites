@@ -34,10 +34,10 @@ const features = [
 ];
 
 const stats = [
-  { value: "500+", label: "Installations" },
+  { value: "50+", label: "Installations" },
   { value: "99.9%", label: "Uptime" },
   { value: "24/7", label: "Support" },
-  { value: "10+", label: "Years" },
+  { value: "3+", label: "Years" },
 ];
 
 const Features = () => {
@@ -57,15 +57,15 @@ const Features = () => {
         </div>
 
         {/* Stats Bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20">
           {stats.map((stat, index) => (
             <div 
               key={stat.label}
-              className="text-center p-6 rounded-xl bg-gradient-card border border-border animate-fade-in opacity-0"
+              className="text-center p-8 rounded-2xl glass shadow-sm hover:shadow-md transition-shadow animate-fade-in opacity-0"
               style={{ animationDelay: `${0.1 * index}s` }}
             >
-              <div className="text-3xl md:text-4xl font-bold text-gradient mb-2">{stat.value}</div>
-              <div className="text-muted-foreground text-sm">{stat.label}</div>
+              <div className="text-4xl md:text-5xl font-display font-extrabold text-gradient mb-3">{stat.value}</div>
+              <div className="text-foreground font-medium tracking-wide uppercase text-sm opacity-80">{stat.label}</div>
             </div>
           ))}
         </div>

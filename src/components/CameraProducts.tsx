@@ -1,5 +1,6 @@
-import { Eye, Wifi, Moon, Cloud, Shield, Cpu } from "lucide-react";
+import { Eye, Wifi, Moon, Cloud, Shield, Cpu, FileText } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import cameraDome from "@/assets/camera-dome.jpg";
 import cameraBullet from "@/assets/camera-bullet.jpg";
 import cameraPtz from "@/assets/camera-ptz.jpg";
@@ -19,6 +20,7 @@ const cameras = [
       { icon: Moon, label: "Night Vision" },
       { icon: Shield, label: "Vandal-Proof" },
     ],
+    datasheet: "/datasheets/dome-camera.pdf",
   },
   {
     name: "Bullet Camera",
@@ -31,6 +33,7 @@ const cameras = [
       { icon: Moon, label: "IR 80m" },
       { icon: Shield, label: "IP67 Rated" },
     ],
+    datasheet: "/datasheets/bullet-camera.pdf",
   },
   {
     name: "PTZ Camera",
@@ -43,6 +46,7 @@ const cameras = [
       { icon: Wifi, label: "Remote Control" },
       { icon: Cpu, label: "Auto Tracking" },
     ],
+    datasheet: "/datasheets/ptz-camera.pdf",
   },
   {
     name: "Wireless IP Camera",
@@ -55,6 +59,7 @@ const cameras = [
       { icon: Cloud, label: "Cloud Storage" },
       { icon: Eye, label: "4K Ultra HD" },
     ],
+    datasheet: "/datasheets/wireless-ip-camera.pdf",
   },
   {
     name: "NVR System",
@@ -67,6 +72,7 @@ const cameras = [
       { icon: Cloud, label: "8TB Storage" },
       { icon: Shield, label: "AI Search" },
     ],
+    datasheet: "/datasheets/nvr-system.pdf",
   },
   {
     name: "Thermal Camera",
@@ -79,6 +85,7 @@ const cameras = [
       { icon: Eye, label: "Heat Map" },
       { icon: Shield, label: "Fire Detect" },
     ],
+    datasheet: "/datasheets/thermal-camera.pdf",
   },
 ];
 
@@ -101,53 +108,68 @@ const CameraProducts = () => {
         </div>
 
         {/* Camera Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {cameras.map((camera, index) => (
             <Card
               key={camera.name}
-              className="bg-gradient-card border-border overflow-hidden hover:border-primary/50 transition-all duration-300 group animate-fade-in-up opacity-0"
+              className="glass border-white/40 overflow-hidden hover:shadow-lg transition-all duration-300 group animate-fade-in-up opacity-0 rounded-2xl flex flex-col h-full"
               style={{ animationDelay: `${0.1 * index}s` }}
             >
               {/* Camera Image */}
-              <div className="h-48 overflow-hidden bg-muted/30">
+              <div className="h-56 overflow-hidden bg-gradient-to-br from-primary/5 to-transparent relative p-6">
+                <div className="absolute inset-0 bg-white/40 group-hover:bg-transparent transition-colors duration-500 Mix-blend-overlay"></div>
                 <img
                   src={camera.image}
                   alt={camera.name}
-                  className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-contain drop-shadow-md group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-500 relative z-10"
                   loading="lazy"
                 />
               </div>
 
               {/* Card Header */}
-              <div className="p-6 pb-4">
-                <div className="flex items-start justify-between mb-3">
+              <div className="p-8 pb-4 flex-1">
+                <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-xl font-semibold text-foreground">
+                    <h3 className="text-2xl font-display font-bold text-foreground mb-1">
                       {camera.name}
                     </h3>
-                    <span className="text-primary text-sm font-medium">
+                    <span className="text-primary text-sm font-semibold tracking-wide uppercase opacity-90">
                       {camera.tagline}
                     </span>
                   </div>
                 </div>
-                <p className="text-muted-foreground text-sm leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed">
                   {camera.description}
                 </p>
               </div>
 
               {/* Feature Pills */}
-              <div className="px-6 pb-6">
+              <div className="px-8 pb-6">
                 <div className="flex flex-wrap gap-2">
                   {camera.features.map((feature) => (
                     <div
                       key={feature.label}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/60 border border-primary/20 text-primary text-xs font-semibold shadow-sm"
                     >
                       <feature.icon className="w-3.5 h-3.5" />
                       {feature.label}
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Action */}
+              <div className="px-8 pb-8 mt-auto flex items-end">
+                <Button 
+                  asChild
+                  className="w-full gap-2 transition-all hover:-translate-y-0.5 rounded-xl h-12 shadow-sm font-semibold" 
+                  variant="default"
+                >
+                  <a href={camera.datasheet} target="_blank" rel="noopener noreferrer">
+                    <FileText className="w-4 h-4" />
+                    View Datasheet
+                  </a>
+                </Button>
               </div>
             </Card>
           ))}

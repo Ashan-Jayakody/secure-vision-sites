@@ -39,11 +39,11 @@ All colors MUST be HSL.
     --radius: 0.75rem;
 
     /* Custom tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(201 96% 32%) 0%, hsl(197 49% 44%) 100%);
-    --gradient-light: linear-gradient(180deg, hsl(210 40% 98%) 0%, hsl(210 40% 96%) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(210 33% 95%) 0%, hsl(210 40% 93%) 100%);
-    --shadow-glow: 0 0 40px hsl(201 96% 32% / 0.2);
-    --shadow-card: 0 4px 24px hsl(222 47% 11% / 0.08);
+    --gradient-primary: linear-gradient(135deg, hsl(201 96% 32%) 0%, hsl(197 60% 50%) 100%);
+    --gradient-light: linear-gradient(180deg, hsl(210 40% 98%) 0%, hsl(214 32% 91% / 0.5) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(210 33% 98%) 100%);
+    --shadow-glow: 0 0 30px hsl(201 96% 32% / 0.15);
+    --shadow-card: 0 8px 32px hsl(222 47% 11% / 0.05);
   }
 }
 
@@ -71,10 +71,20 @@ All colors MUST be HSL.
   
   .shadow-card {
     box-shadow: var(--shadow-card);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  
+  .shadow-card:hover {
+    box-shadow: 0 12px 40px hsl(222 47% 11% / 0.08);
+    transform: translateY(-2px);
   }
   
   .glass {
-    @apply backdrop-blur-xl bg-card/50 border border-border/50;
+    @apply backdrop-blur-xl bg-white/70 border border-white/60 shadow-sm transition-all duration-300;
+  }
+  
+  .glass:hover {
+    @apply bg-white/90 border-white shadow-md;
   }
 }
 

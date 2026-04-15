@@ -13,13 +13,13 @@ const Header = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass">
-      <div className="container mx-auto px-4">
+    <header className="fixed top-4 left-4 right-4 z-50 glass rounded-2xl mx-auto max-w-7xl">
+      <div className="container mx-auto px-6">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <a href="#" className="flex items-center gap-2 text-foreground">
-            <img src="/images/logo.png" alt="Vintage CCTV Logo" className="h-14 md:h-16 w-auto" />
-            <span className="font-bold text-2xl">Vintage CCTV</span>
+          <a href="#" className="flex items-center gap-2 text-foreground group">
+            <img src="/images/logo.png" alt="Vintage CCTV Logo" className="h-14 md:h-52 w-auto mt-6 group-hover:opacity-90 transition-opacity" />
+
           </a>
 
           {/* Desktop Navigation */}
@@ -28,7 +28,7 @@ const Header = () => {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
+                className="text-muted-foreground hover:text-primary transition-colors text-sm font-semibold relative after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-0 after:bg-primary after:transition-all hover:after:w-full"
               >
                 {link.label}
               </a>
@@ -37,7 +37,7 @@ const Header = () => {
 
           {/* CTA Button */}
           <div className="hidden md:block">
-            <Button className="bg-gradient-primary text-primary-foreground font-semibold shadow-glow hover:opacity-90 transition-opacity">
+            <Button className="bg-gradient-primary text-primary-foreground font-semibold shadow-glow hover:opacity-90 hover:-translate-y-0.5 transition-all rounded-full px-6">
               Get Free Quote
             </Button>
           </div>

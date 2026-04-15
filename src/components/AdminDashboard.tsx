@@ -4,34 +4,74 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useAlbums, Album } from "@/hooks/useAlbums";
 import { useMessages } from "@/hooks/useMessages";
 import { toast } from "@/hooks/use-toast";
 import { uploadMedia } from "@/services/cloudinaryApi";
-import { Plus, Trash2, Edit, LogOut, FolderPlus, Image, ArrowLeft, X, Loader2, Mail, LayoutDashboard, Settings, Phone, Video } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Edit,
+  LogOut,
+  FolderPlus,
+  Image,
+  ArrowLeft,
+  X,
+  Loader2,
+  Mail,
+  LayoutDashboard,
+  Settings,
+  Phone,
+  Video,
+} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AdminDashboard = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
-  const { albums, addAlbum, updateAlbum, deleteAlbum, addInstallation, deleteInstallation } = useAlbums();
-  const { messages, deleteMessage, isLoading: isLoadingMessages } = useMessages();
-  
+  const {
+    albums,
+    addAlbum,
+    updateAlbum,
+    deleteAlbum,
+    addInstallation,
+    deleteInstallation,
+  } = useAlbums();
+  const {
+    messages,
+    deleteMessage,
+    isLoading: isLoadingMessages,
+  } = useMessages();
+
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   const [activeTab, setActiveTab] = useState("albums");
   const [isAlbumDialogOpen, setIsAlbumDialogOpen] = useState(false);
-  const [isInstallationDialogOpen, setIsInstallationDialogOpen] = useState(false);
+  const [isInstallationDialogOpen, setIsInstallationDialogOpen] =
+    useState(false);
   const [editingAlbum, setEditingAlbum] = useState<Album | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // Album form state
   const [albumName, setAlbumName] = useState("");
   const [albumDescription, setAlbumDescription] = useState("");
-  
+
   // Installation form state
   const [instTitle, setInstTitle] = useState("");
   const [instCategory, setInstCategory] = useState("");
@@ -55,11 +95,11 @@ const AdminDashboard = () => {
     if (files.length > 0) {
       const newFiles = [...instImageFiles, ...files].slice(0, 6);
       setInstImageFiles(newFiles);
-      
+
       // Create preview URLs
-      const previews = newFiles.map(file => URL.createObjectURL(file));
+      const previews = newFiles.map((file) => URL.createObjectURL(file));
       setInstImagePreviews(previews);
-      
+
       if (files.length + instImageFiles.length > 6) {
         toast({ title: "Maximum 6 images allowed", variant: "destructive" });
       }
@@ -70,7 +110,7 @@ const AdminDashboard = () => {
     const newFiles = [...instImageFiles];
     newFiles.splice(index, 1);
     setInstImageFiles(newFiles);
-    
+
     const newPreviews = [...instImagePreviews];
     URL.revokeObjectURL(newPreviews[index]);
     newPreviews.splice(index, 1);
@@ -82,17 +122,24 @@ const AdminDashboard = () => {
       toast({ title: "Album name is required", variant: "destructive" });
       return;
     }
-    
+
     setIsSaving(true);
     try {
       if (editingAlbum) {
-        await updateAlbum(editingAlbum._id, { name: albumName, description: albumDescription });
+        await updateAlbum(editingAlbum._id, {
+          name: albumName,
+          description: albumDescription,
+        });
         toast({ title: "Album updated successfully" });
       } else {
-        await addAlbum({ name: albumName, description: albumDescription, installations: [] });
+        await addAlbum({
+          name: albumName,
+          description: albumDescription,
+          installations: [],
+        });
         toast({ title: "Album created successfully" });
       }
-      
+
       setAlbumName("");
       setAlbumDescription("");
       setEditingAlbum(null);
@@ -124,85 +171,93 @@ const AdminDashboard = () => {
   };
 
   const handleCreateInstallation = async () => {
-    if (!selectedAlbum) return;
-    if (!instTitle.trim() || !instCategory.trim() || (instImagePreviews.length === 0 && !instVideoFile)) {
-      toast({ title: "Please fill in all required fields", variant: "destructive" });
-      return;
+  if (!selectedAlbum) return;
+  if (!instTitle.trim() || !instCategory.trim() || (instImageFiles.length === 0 && !instVideoFile)) {
+    toast({ title: "Please fill in all required fields", variant: "destructive" });
+    return;
+  }
+  
+  setIsSaving(true);
+  try {
+    setIsUploading(true);
+    const uploadedUrls: string[] = [];
+    let videoUrl = "";
+
+    // Upload video if selected
+    if (instVideoFile) {
+      try {
+        const result = await uploadMedia(instVideoFile);
+        videoUrl = result.secure_url;
+      } catch (error) {
+        toast({ title: "Failed to upload video", variant: "destructive" });
+      }
     }
     
-    setIsSaving(true);
-    try {
-      setIsUploading(true);
-      const uploadedUrls: string[] = [];
-      let videoUrl = "";
-
-      // Upload video if selected
-      if (instVideoFile) {
-        try {
-          const result = await uploadMedia(instVideoFile);
-          videoUrl = result.secure_url;
-        } catch (error) {
-          toast({ title: "Failed to upload video", variant: "destructive" });
-        }
+    // Upload all images
+    for (const file of instImageFiles) {
+      try {
+        const result = await uploadMedia(file);
+        uploadedUrls.push(result.secure_url);
+      } catch (error) {
+        toast({ title: `Failed to upload image: ${file.name}`, variant: "destructive" });
       }
-      
-      for (const file of instImageFiles) {
-        try {
-          const result = await uploadMedia(file);
-          uploadedUrls.push(result.secure_url);
-        } catch (error) {
-          toast({ title: `Failed to upload image: ${file.name}`, variant: "destructive" });
-        }
-      }
-      setIsUploading(false);
-
-      if (uploadedUrls.length === 0 && !videoUrl) {
-        setIsSaving(false);
-        return;
-      }
-
-      // If we have a video and images, we can attach the video to each image installation
-      // If we only have a video, we create one installation with a placeholder/thumbnail image
-      if (uploadedUrls.length === 0 && videoUrl) {
-        await addInstallation(selectedAlbum._id, {
-          title: instTitle,
-          category: instCategory,
-          description: instDescription,
-          date: instDate || new Date().toISOString().split("T")[0],
-          image: "https://res.cloudinary.com/dh3sza0e8/image/upload/v1/placeholder_video.png", // Fallback thumbnail
-          video: videoUrl,
-        });
-      } else {
-        for (const imageUrl of uploadedUrls) {
-          await addInstallation(selectedAlbum._id, {
-            title: instTitle,
-            category: instCategory,
-            description: instDescription,
-            date: instDate || new Date().toISOString().split("T")[0],
-            image: imageUrl,
-            video: videoUrl,
-          });
-        }
-      }
-      
-      // Reset form
-      setInstTitle("");
-      setInstCategory("");
-      setInstDescription("");
-      setInstDate("");
-      setInstImage("");
-      setInstImageFiles([]);
-      setInstImagePreviews([]);
-      setInstVideoFile(null);
-      setIsInstallationDialogOpen(false);
-      
-      toast({ title: `${uploadedUrls.length} installation(s) added successfully` });
-    } catch (error) {
-      toast({ title: "Failed to add installations", variant: "destructive" });
-    } finally {
-      setIsSaving(false);
     }
-  };
+    setIsUploading(false);
+
+    if (uploadedUrls.length === 0 && !videoUrl) {
+      setIsSaving(false);
+      toast({ title: "No media uploaded successfully", variant: "destructive" });
+      return;
+    }
+
+    let installationCount = 0;
+
+    // Create one installation for each image (NO video attached)
+    for (const imageUrl of uploadedUrls) {
+      await addInstallation(selectedAlbum._id, {
+        title: instTitle,
+        category: instCategory,
+        description: instDescription,
+        date: instDate || new Date().toISOString().split("T")[0],
+        image: imageUrl,
+      });
+      installationCount++;
+    }
+
+// Create a separate installation for the video (if exists)
+if (videoUrl) {
+  // Cloudinary trick: changing the extension to .jpg gets a frame from the video
+  const videoThumbnail = videoUrl.replace(/\.[^/.]+$/, ".jpg");
+
+  await addInstallation(selectedAlbum._id, {
+    title: instTitle,
+    category: instCategory,
+    description: instDescription,
+    date: instDate || new Date().toISOString().split("T")[0],
+    image: videoThumbnail, // This satisfies the 'required' backend field
+    video: videoUrl,
+  });
+  installationCount++;
+}
+    
+    // Reset form
+    setInstTitle("");
+    setInstCategory("");
+    setInstDescription("");
+    setInstDate("");
+    setInstImage("");
+    setInstImageFiles([]);
+    setInstImagePreviews([]);
+    setInstVideoFile(null);
+    setIsInstallationDialogOpen(false);
+    
+    toast({ title: `${installationCount} installation(s) added successfully` });
+  } catch (error) {
+    toast({ title: "Failed to add installations", variant: "destructive" });
+  } finally {
+    setIsSaving(false);
+  }
+};
 
   const handleDeleteInstallation = async (installationId: string) => {
     if (!selectedAlbum) return;
@@ -214,7 +269,9 @@ const AdminDashboard = () => {
     }
   };
 
-  const currentAlbum = selectedAlbum ? albums.find((a) => a._id === selectedAlbum._id) : null;
+  const currentAlbum = selectedAlbum
+    ? albums.find((a) => a._id === selectedAlbum._id)
+    : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -223,7 +280,11 @@ const AdminDashboard = () => {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             {currentAlbum && (
-              <Button variant="ghost" size="icon" onClick={() => setSelectedAlbum(null)}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSelectedAlbum(null)}
+              >
                 <ArrowLeft className="w-5 h-5" />
               </Button>
             )}
@@ -243,13 +304,23 @@ const AdminDashboard = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
           <TabsList className="bg-card border border-border p-1">
-            <TabsTrigger value="albums" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger
+              value="albums"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
               <LayoutDashboard className="w-4 h-4 mr-2" />
               Albums
             </TabsTrigger>
-            <TabsTrigger value="messages" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger
+              value="messages"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
               <Mail className="w-4 h-4 mr-2" />
               Messages
               {messages.length > 0 && (
@@ -265,15 +336,20 @@ const AdminDashboard = () => {
               // Albums List View
               <div>
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-semibold text-foreground">Albums</h2>
-                  <Dialog open={isAlbumDialogOpen} onOpenChange={(open) => {
-                    setIsAlbumDialogOpen(open);
-                    if (!open) {
-                      setEditingAlbum(null);
-                      setAlbumName("");
-                      setAlbumDescription("");
-                    }
-                  }}>
+                  <h2 className="text-2xl font-semibold text-foreground">
+                    Albums
+                  </h2>
+                  <Dialog
+                    open={isAlbumDialogOpen}
+                    onOpenChange={(open) => {
+                      setIsAlbumDialogOpen(open);
+                      if (!open) {
+                        setEditingAlbum(null);
+                        setAlbumName("");
+                        setAlbumDescription("");
+                      }
+                    }}
+                  >
                     <DialogTrigger asChild>
                       <Button>
                         <FolderPlus className="w-4 h-4 mr-2" />
@@ -288,7 +364,12 @@ const AdminDashboard = () => {
                       </DialogHeader>
                       <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                          <Label htmlFor="album-name" className="text-foreground">Album Name</Label>
+                          <Label
+                            htmlFor="album-name"
+                            className="text-foreground"
+                          >
+                            Album Name
+                          </Label>
                           <Input
                             id="album-name"
                             value={albumName}
@@ -298,11 +379,18 @@ const AdminDashboard = () => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="album-desc" className="text-foreground">Description</Label>
+                          <Label
+                            htmlFor="album-desc"
+                            className="text-foreground"
+                          >
+                            Description
+                          </Label>
                           <Textarea
                             id="album-desc"
                             value={albumDescription}
-                            onChange={(e) => setAlbumDescription(e.target.value)}
+                            onChange={(e) =>
+                              setAlbumDescription(e.target.value)
+                            }
                             placeholder="Brief description of this album"
                             className="bg-background/50 border-border"
                           />
@@ -325,12 +413,16 @@ const AdminDashboard = () => {
                     >
                       <CardHeader className="pb-2">
                         <div className="flex items-start justify-between">
-                          <div onClick={() => setSelectedAlbum(album)} className="flex-1">
+                          <div
+                            onClick={() => setSelectedAlbum(album)}
+                            className="flex-1"
+                          >
                             <CardTitle className="text-lg text-foreground group-hover:text-primary transition-colors">
                               {album.name}
                             </CardTitle>
                             <CardDescription className="text-muted-foreground mt-1">
-                              {album.installations.length} installation{album.installations.length !== 1 ? "s" : ""}
+                              {album.installations.length} installation
+                              {album.installations.length !== 1 ? "s" : ""}
                             </CardDescription>
                           </div>
                           <div className="flex gap-1">
@@ -366,12 +458,20 @@ const AdminDashboard = () => {
                         {album.installations.length > 0 && (
                           <div className="grid grid-cols-3 gap-1 mt-4">
                             {album.installations.slice(0, 3).map((inst) => (
-                              <div key={inst._id || inst.id} className="aspect-square rounded overflow-hidden">
+                              <div
+                                key={inst._id || inst.id}
+                                className="aspect-square rounded overflow-hidden"
+                              >
                                 <img
                                   src={inst.image}
                                   alt={inst.title}
                                   className="w-full h-full object-cover"
                                 />
+                                {inst.video && (
+                                  <div className="absolute bottom-1 right-1 bg-black/70 p-1 rounded">
+                                    <Video className="w-3 h-3 text-white" />
+                                  </div>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -386,12 +486,18 @@ const AdminDashboard = () => {
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <p className="text-muted-foreground">{currentAlbum.description}</p>
+                    <p className="text-muted-foreground">
+                      {currentAlbum.description}
+                    </p>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {currentAlbum.installations.length} installation{currentAlbum.installations.length !== 1 ? "s" : ""}
+                      {currentAlbum.installations.length} installation
+                      {currentAlbum.installations.length !== 1 ? "s" : ""}
                     </p>
                   </div>
-                  <Dialog open={isInstallationDialogOpen} onOpenChange={setIsInstallationDialogOpen}>
+                  <Dialog
+                    open={isInstallationDialogOpen}
+                    onOpenChange={setIsInstallationDialogOpen}
+                  >
                     <DialogTrigger asChild>
                       <Button>
                         <Plus className="w-4 h-4 mr-2" />
@@ -400,11 +506,15 @@ const AdminDashboard = () => {
                     </DialogTrigger>
                     <DialogContent className="bg-card border-border max-w-lg">
                       <DialogHeader>
-                        <DialogTitle className="text-foreground">Add New Installation</DialogTitle>
+                        <DialogTitle className="text-foreground">
+                          Add New Installation
+                        </DialogTitle>
                       </DialogHeader>
                       <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
                         <div className="space-y-2">
-                          <Label className="text-foreground">Images (Max 6) *</Label>
+                          <Label className="text-foreground">
+                            Images (Max 6) *
+                          </Label>
                           <div
                             className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
                             onClick={() => fileInputRef.current?.click()}
@@ -412,7 +522,10 @@ const AdminDashboard = () => {
                             {instImagePreviews.length > 0 ? (
                               <div className="grid grid-cols-3 gap-2">
                                 {instImagePreviews.map((preview, index) => (
-                                  <div key={index} className="relative group/img">
+                                  <div
+                                    key={index}
+                                    className="relative group/img"
+                                  >
                                     <img
                                       src={preview}
                                       alt={`Preview ${index}`}
@@ -457,14 +570,18 @@ const AdminDashboard = () => {
                         </div>
 
                         <div className="space-y-2">
-                          <Label className="text-foreground">Video (Optional)</Label>
+                          <Label className="text-foreground">
+                            Video (Optional)
+                          </Label>
                           <div
                             className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors"
                             onClick={() => videoInputRef.current?.click()}
                           >
                             {instVideoFile ? (
                               <div className="flex items-center justify-between bg-secondary p-2 rounded">
-                                <span className="text-sm truncate max-w-[200px]">{instVideoFile.name}</span>
+                                <span className="text-sm truncate max-w-[200px]">
+                                  {instVideoFile.name}
+                                </span>
                                 <Button
                                   variant="ghost"
                                   size="icon"
@@ -498,7 +615,12 @@ const AdminDashboard = () => {
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="inst-title" className="text-foreground">Title *</Label>
+                          <Label
+                            htmlFor="inst-title"
+                            className="text-foreground"
+                          >
+                            Title *
+                          </Label>
                           <Input
                             id="inst-title"
                             value={instTitle}
@@ -508,7 +630,12 @@ const AdminDashboard = () => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="inst-category" className="text-foreground">Category *</Label>
+                          <Label
+                            htmlFor="inst-category"
+                            className="text-foreground"
+                          >
+                            Category *
+                          </Label>
                           <Input
                             id="inst-category"
                             value={instCategory}
@@ -518,7 +645,12 @@ const AdminDashboard = () => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="inst-desc" className="text-foreground">Description</Label>
+                          <Label
+                            htmlFor="inst-desc"
+                            className="text-foreground"
+                          >
+                            Description
+                          </Label>
                           <Textarea
                             id="inst-desc"
                             value={instDescription}
@@ -528,7 +660,12 @@ const AdminDashboard = () => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="inst-date" className="text-foreground">Installation Date</Label>
+                          <Label
+                            htmlFor="inst-date"
+                            className="text-foreground"
+                          >
+                            Installation Date
+                          </Label>
                           <Input
                             id="inst-date"
                             type="date"
@@ -539,7 +676,10 @@ const AdminDashboard = () => {
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button onClick={handleCreateInstallation} disabled={isSaving || isUploading}>
+                        <Button
+                          onClick={handleCreateInstallation}
+                          disabled={isSaving || isUploading}
+                        >
                           {isUploading ? (
                             <>
                               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -562,7 +702,9 @@ const AdminDashboard = () => {
                 {currentAlbum.installations.length === 0 ? (
                   <div className="text-center py-12 border border-dashed border-border rounded-lg">
                     <Image className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">No installations yet</p>
+                    <p className="text-muted-foreground">
+                      No installations yet
+                    </p>
                     <p className="text-sm text-muted-foreground mt-1">
                       Add your first installation to this album
                     </p>
@@ -570,31 +712,65 @@ const AdminDashboard = () => {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {currentAlbum.installations.map((inst) => (
-                      <Card key={inst._id || inst.id} className="bg-card/50 border-border overflow-hidden group">
+                      <Card
+                        key={inst._id || inst.id}
+                        className="bg-card/50 border-border overflow-hidden group"
+                      >
                         <div className="aspect-[4/3] overflow-hidden relative">
+                          {/* Show image by default, video only plays on hover if it exists */}
                           <img
                             src={inst.image}
                             alt={inst.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
+
+                          {/* If video exists, show it on hover */}
+                          {inst.video && (
+                            <>
+                              <video
+                                src={inst.video}
+                                className="w-full h-full object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                muted
+                                loop
+                                onMouseOver={(e) => e.currentTarget.play()}
+                                onMouseOut={(e) => {
+                                  e.currentTarget.pause();
+                                  e.currentTarget.currentTime = 0;
+                                }}
+                              />
+                              {/* Video indicator icon */}
+                              <div className="absolute bottom-2 left-2 bg-black/70 p-1.5 rounded backdrop-blur-sm">
+                                <Video className="w-4 h-4 text-white" />
+                              </div>
+                            </>
+                          )}
+
                           <Button
                             variant="destructive"
                             size="icon"
                             className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
-                            onClick={() => handleDeleteInstallation(inst._id || inst.id)}
+                            onClick={() =>
+                              handleDeleteInstallation(inst._id || inst.id)
+                            }
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
                         <CardContent className="p-4">
-                          <span className="text-xs text-primary font-medium">{inst.category}</span>
-                          <h3 className="text-foreground font-semibold mt-1">{inst.title}</h3>
+                          <span className="text-xs text-primary font-medium">
+                            {inst.category}
+                          </span>
+                          <h3 className="text-foreground font-semibold mt-1">
+                            {inst.title}
+                          </h3>
                           {inst.description && (
                             <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                               {inst.description}
                             </p>
                           )}
-                          <p className="text-xs text-muted-foreground mt-2">{inst.date}</p>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            {inst.date}
+                          </p>
                         </CardContent>
                       </Card>
                     ))}
@@ -606,7 +782,9 @@ const AdminDashboard = () => {
 
           <TabsContent value="messages" className="mt-0">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold text-foreground">Inquiries</h2>
+              <h2 className="text-2xl font-semibold text-foreground">
+                Inquiries
+              </h2>
             </div>
 
             {isLoadingMessages ? (
@@ -667,7 +845,7 @@ const AdminDashboard = () => {
                       </div>
                       <div className="mt-3">
                         <span className="inline-flex items-center px-2 py-1 rounded text-[10px] font-semibold bg-primary/10 text-primary uppercase tracking-wider">
-                          {message.service || 'Security Assessment'}
+                          {message.service || "Security Assessment"}
                         </span>
                       </div>
                     </CardContent>
