@@ -234,12 +234,11 @@ app.delete('/api/messages/:id', authenticateToken, async (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', mongodb: mongoose.connection.readyState === 1 });
 });
-// Serve Vite frontend
-app.use(express.static(path.join(__dirname, 'frontend/dist')));
+// Serve Vite frontend (dist is at project root)
+app.use(express.static(path.join(__dirname, '../dist')));
 
-// Fallback for SPA routing
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'));
+  res.sendFile(path.join(__dirname, '../dist', 'index.html'));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
