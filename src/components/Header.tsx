@@ -37,9 +37,11 @@ const Header = () => {
 
           {/* CTA Button */}
           <div className="hidden md:block">
+            <a href="#contact">
             <Button className="bg-gradient-primary text-primary-foreground font-semibold shadow-glow hover:opacity-90 hover:-translate-y-0.5 transition-all rounded-full px-6">
               Get Free Quote
             </Button>
+            </a>
           </div>
 
           {/* Mobile Menu Toggle */}

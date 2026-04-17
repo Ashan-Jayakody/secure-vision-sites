@@ -6,7 +6,7 @@ const Hero = () => {
   const benefits = [
     "24/7 Professional Monitoring",
     "Free Site Survey",
-    "Lifetime Support",
+    "Island Wide Service",
   ];
 
   return (
@@ -28,7 +28,7 @@ const Hero = () => {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border-primary/20 shadow-sm mb-8 animate-fade-in opacity-0" style={{ animationDelay: "0.1s" }}>
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse-glow" />
-            <span className="text-sm text-foreground font-semibold">Trusted by 100+ Businesses</span>
+            <span className="text-sm text-foreground font-semibold">Reliable CCTV Solutions Across Sri Lanka</span>
           </div>
 
           {/* Headline */}
@@ -39,7 +39,7 @@ const Hero = () => {
 
           {/* Subheadline */}
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-10 max-w-xl animate-fade-in opacity-0 leading-relaxed" style={{ animationDelay: "0.3s" }}>
-            Protect what matters most with cutting-edge surveillance systems. 
+            Protect what matters most with trusted CCTV solutions<br/>in Sri Lanka. 
             Expert installation, maintenance, and 24/7 support.
           </p>
 
@@ -55,6 +55,7 @@ const Hero = () => {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 animate-fade-in opacity-0" style={{ animationDelay: "0.5s" }}>
+            <a href="#contact">
             <Button 
               size="lg" 
               className="w-full sm:w-auto bg-gradient-primary text-primary-foreground font-semibold shadow-glow hover:opacity-90 hover:-translate-y-0.5 transition-all text-base px-8 h-14 rounded-full"
@@ -62,6 +63,7 @@ const Hero = () => {
               Get Free Quote
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
+            </a>
             <Button 
               size="lg" 
               variant="outline" 

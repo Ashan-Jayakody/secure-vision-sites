@@ -7,21 +7,21 @@ const services = [
     title: "Residential CCTV",
     description: "Protect your home with smart security cameras that integrate with your smartphone.",
   },
-  {
+  /*{
     icon: Building2,
     title: "Commercial Systems",
     description: "Enterprise-grade surveillance for offices, banks, and corporate facilities.",
-  },
+  },*/
   {
     icon: Warehouse,
     title: "Industrial Security",
     description: "Heavy-duty cameras for warehouses, factories, and manufacturing plants.",
   },
-  {
+  /*{
     icon: Store,
     title: "Retail Solutions",
     description: "Loss prevention systems designed specifically for retail environments.",
-  },
+  },*/
   {
     icon: Car,
     title: "Parking & Outdoor",

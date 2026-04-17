@@ -10,19 +10,19 @@ const contactInfo = [
   {
     icon: Phone,
     label: "Call Us",
-    value: "+1 (555) 123-4567",
-    href: "tel:+15551234567",
+    value: "+94 77 238 8637",
+    href: "tel:+94772388637",
   },
   {
     icon: Mail,
     label: "Email Us",
-    value: "info@secureview.com",
-    href: "mailto:info@secureview.com",
+    value: "vintagecctvsolutions@gmail.com",
+    href: "mailto:vintagecctvsolutions@gmail.com",
   },
   {
     icon: MapPin,
     label: "Visit Us",
-    value: "123 Security Lane, Tech City",
+    value: "No. 188, Kurukulawa, Ragama, Sri Lanka, 11010",
     href: "#",
   },
   {

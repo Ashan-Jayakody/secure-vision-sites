@@ -10,12 +10,12 @@ const Footer = () => {
       { label: "Industrial Security", href: "#" },
       { label: "Remote Monitoring", href: "#" },
     ],
-    company: [
+    /*company: [
       { label: "About Us", href: "#" },
       { label: "Our Team", href: "#" },
       { label: "Careers", href: "#" },
       { label: "Contact", href: "#contact" },
-    ],
+    ],*/
     support: [
       { label: "Help Center", href: "#" },
       { label: "Warranty", href: "#" },
@@ -25,7 +25,7 @@ const Footer = () => {
   };
 
   const socials = [
-    { icon: Facebook, href: "#" },
+    { icon: Facebook, href: "https://www.facebook.com/profile.php?id=61551667607803" },
     { icon: Twitter, href: "#" },
     { icon: Instagram, href: "#" },
     { icon: Linkedin, href: "#" },
@@ -36,14 +36,14 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <a href="#" className="flex items-center gap-2 text-foreground mb-4">
-              <img src="/images/logo.png" alt="Vintage CCTV Logo" className="h-14 w-auto" />
+              <img src="/images/logo.png" alt="Vintage CCTV Logo" className="h-36 w-auto" />
               <span className="font-bold text-2xl">Vintage CCTV</span>
             </a>
             <p className="text-muted-foreground mb-6 max-w-sm">
               Professional CCTV installation and monitoring services. 
-              Protecting homes and businesses since 2014.
+              Protecting homes and businesses since 2020.
             </p>
             <div className="flex gap-4">
               {socials.map((social, index) => (
@@ -60,7 +60,7 @@ const Footer = () => {
 
           {/* Services */}
           <div>
-            <h4 className="font-semibold text-foreground mb-4">Services</h4>
+            <h4 className="font-semibold text-foreground mb-4 mt-10">Services</h4>
             <ul className="space-y-3">
               {links.services.map((link) => (
                 <li key={link.label}>
@@ -73,7 +73,7 @@ const Footer = () => {
           </div>
 
           {/* Company */}
-          <div>
+          {/*<div>
             <h4 className="font-semibold text-foreground mb-4">Company</h4>
             <ul className="space-y-3">
               {links.company.map((link) => (
@@ -84,11 +84,11 @@ const Footer = () => {
                 </li>
               ))}
             </ul>
-          </div>
+          </div>*/}
 
           {/* Support */}
           <div>
-            <h4 className="font-semibold text-foreground mb-4">Support</h4>
+            <h4 className="font-semibold text-foreground mb-4 mt-10">Support</h4>
             <ul className="space-y-3">
               {links.support.map((link) => (
                 <li key={link.label}>
@@ -114,7 +114,7 @@ const Footer = () => {
               Admin
             </a>
             <p className="text-muted-foreground text-sm">
-              Licensed & Insured | 24/7 Emergency Service
+              Licensed & Insured | 24/7 Service
             </p>
           </div>
         </div>

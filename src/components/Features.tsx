@@ -23,7 +23,7 @@ const features = [
   },
   {
     icon: Users,
-    title: "10+ Years Experience",
+    title: "3+ Years Experience",
     description: "Over a decade of expertise protecting homes and businesses.",
   },
   {
