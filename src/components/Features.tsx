@@ -23,7 +23,7 @@ const features = [
   },
   {
     icon: Users,
-    title: "3+ Years Experience",
+    title: "5+ Years Experience",
     description: "Over a decade of expertise protecting homes and businesses.",
   },
   {
@@ -37,7 +37,7 @@ const stats = [
   { value: "50+", label: "Installations" },
   { value: "99.9%", label: "Uptime" },
   { value: "24/7", label: "Support" },
-  { value: "3+", label: "Years" },
+  { value: "5+", label: "Years" },
 ];
 
 const Features = () => {
