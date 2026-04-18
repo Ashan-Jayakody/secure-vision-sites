@@ -228,7 +228,7 @@ const Gallery = () => {
           setSelectedVideo(null);
         }
       }}>
-        <DialogContent className="max-w-4xl bg-background border-border p-0 overflow-hidden">
+        <DialogContent className="max-w-4xl bg-background border-border p-0 overflow-hidden" aria-describedby={undefined}>
           <button
             onClick={() => {
               setSelectedImage(null);

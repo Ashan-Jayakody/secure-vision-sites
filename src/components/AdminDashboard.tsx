@@ -356,7 +356,7 @@ if (videoUrl) {
                         New Album
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-card border-border">
+                    <DialogContent className="bg-card border-border" aria-describedby={undefined}>
                       <DialogHeader>
                         <DialogTitle className="text-foreground">
                           {editingAlbum ? "Edit Album" : "Create New Album"}
@@ -504,7 +504,7 @@ if (videoUrl) {
                         Add Installation
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-card border-border max-w-lg">
+                    <DialogContent className="bg-card border-border max-w-lg" aria-describedby={undefined}>
                       <DialogHeader>
                         <DialogTitle className="text-foreground">
                           Add New Installation
